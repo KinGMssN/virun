@@ -1,10 +1,47 @@
 import json
+import logging
 import os
 import re
 
-from openai import APITimeoutError, OpenAI, RateLimitError
+from openai import (
+    APIConnectionError,
+    APIStatusError,
+    APITimeoutError,
+    AuthenticationError,
+    BadRequestError,
+    NotFoundError,
+    OpenAI,
+    PermissionDeniedError,
+    RateLimitError,
+)
 
 from app.concierge.prompts import CHAT_SYSTEM_PROMPT
+
+log = logging.getLogger("groq")
+
+
+def _raise_provider_error(exc: Exception) -> None:
+    """Map provider exceptions to safe codes; never log key or request content."""
+    if isinstance(exc, APITimeoutError):
+        code = "MODEL_TIMEOUT"
+    elif isinstance(exc, RateLimitError):
+        code = "QUOTA_EXCEEDED"
+    elif isinstance(exc, AuthenticationError):
+        code = "INVALID_API_KEY"
+    elif isinstance(exc, PermissionDeniedError):
+        code = "MODEL_ACCESS_DENIED"
+    elif isinstance(exc, NotFoundError):
+        code = "MODEL_NOT_FOUND"
+    elif isinstance(exc, BadRequestError):
+        code = "INVALID_MODEL_REQUEST"
+    elif isinstance(exc, APIConnectionError):
+        code = "PROVIDER_UNAVAILABLE"
+    elif isinstance(exc, APIStatusError):
+        code = "PROVIDER_ERROR"
+    else:
+        code = "MODEL_ERROR"
+    log.warning("Groq request failed code=%s exception=%s", code, type(exc).__name__)
+    raise ModelError(code) from exc
 
 
 class ModelError(Exception):
@@ -37,12 +74,8 @@ class GroqAdapter:
                 response_format={"type": "json_object"},
             )
             return r.choices[0].message.content or ""
-        except APITimeoutError:
-            raise ModelError("MODEL_TIMEOUT")
-        except RateLimitError:
-            raise ModelError("QUOTA_EXCEEDED")
-        except Exception:
-            raise ModelError("MODEL_ERROR")
+        except Exception as exc:
+            _raise_provider_error(exc)
 
     def extract(self, prompt: str) -> str:
         return self._complete_json(prompt)
@@ -67,12 +100,8 @@ class GroqAdapter:
             return reply.strip()
         except ModelError:
             raise
-        except APITimeoutError:
-            raise ModelError("MODEL_TIMEOUT")
-        except RateLimitError:
-            raise ModelError("QUOTA_EXCEEDED")
-        except Exception:
-            raise ModelError("MODEL_ERROR")
+        except Exception as exc:
+            _raise_provider_error(exc)
 
 
 class MockAdapter:

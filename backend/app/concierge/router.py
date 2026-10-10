@@ -23,7 +23,6 @@ log = logging.getLogger("concierge")
 
 FALLBACK_CODES = {"QUOTA_EXCEEDED", "MODEL_TIMEOUT", "MODEL_ERROR"}
 
-
 @router.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest):
     try:
