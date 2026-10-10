@@ -37,9 +37,11 @@ class Profile(UUIDPrimaryKey, Timestamped, Base):
     id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("auth.users.id", ondelete="CASCADE"), primary_key=True)
     display_name: Mapped[str] = mapped_column(String(120), nullable=False)
     phone: Mapped[str | None] = mapped_column(String(32), unique=True)
+    account_type: Mapped[str] = mapped_column(String(16), server_default="tourist", nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(Text)
     locale: Mapped[str] = mapped_column(String(20), server_default="en", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, server_default=text("true"), nullable=False)
+    __table_args__ = (CheckConstraint("account_type in ('tourist','guide')", name="profile_account_type"),)
 
 
 class Role(Base):
@@ -61,9 +63,15 @@ class GuideProfile(UUIDPrimaryKey, Timestamped, Base):
     profile_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("profiles.id", ondelete="CASCADE"), unique=True, nullable=False)
     biography: Mapped[str | None] = mapped_column(Text)
     city: Mapped[str] = mapped_column(String(120), nullable=False)
+    years_experience: Mapped[int] = mapped_column(SmallInteger, server_default="0", nullable=False)
+    city_knowledge_rating: Mapped[int] = mapped_column(SmallInteger, server_default="4", nullable=False)
     verification_status: Mapped[str] = mapped_column(String(24), server_default="unverified", nullable=False)
     is_listed: Mapped[bool] = mapped_column(Boolean, server_default=text("false"), nullable=False)
-    __table_args__ = (CheckConstraint("verification_status in ('unverified','pending','verified','rejected')", name="guide_verification_status"),)
+    __table_args__ = (
+        CheckConstraint("verification_status in ('unverified','pending','verified','rejected')", name="guide_verification_status"),
+        CheckConstraint("years_experience between 0 and 60", name="guide_years_experience"),
+        CheckConstraint("city_knowledge_rating between 1 and 5", name="guide_city_knowledge_rating"),
+    )
 
 
 class GuideLanguage(Base):

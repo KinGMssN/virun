@@ -50,6 +50,8 @@ curl http://127.0.0.1:8000/api/transport/options
 | GET | `/api/transport/options` | All records incl. cancelled/sold-out, with `data_source`. Optional filters: `origin_stop_id`, `destination_stop_id`, `mode` |
 | GET | `/api/rail/stations?q=Visakhapatnam` | Real railway station lookup through RailRadar; requires `RAILRADAR_API_KEY` |
 | GET | `/api/rail/trains?from_station=VSKP&to_station=SC&travel_date=2026-10-11` | Real train timetable and live status/delay when available. RailRadar does not return fares, seat inventory, or booking. |
+| GET, PUT | `/api/profile/role` | Requires a Supabase bearer token. Stores one immutable tourist-or-guide account type per Supabase user. |
+| GET, PUT | `/api/guides/profile` | Requires a Supabase bearer token. Reads or saves guide name, phone, city, experience, city knowledge, biography, and normalized language records. |
 | GET | `/` | Virun single-file frontend |
 | GET | `/resources/...` | Frontend images and other bundled resources |
 | GET | `/health` | liveness |
@@ -111,6 +113,11 @@ The public schema tables are `profiles`, `roles`, `profile_roles`, `guide_profil
 `conversation_participants`, `messages`, `trip_events`, `transport_stops`, and
 `transport_options`. The migration references Supabase Auth's `auth.users` table but
 never creates or drops it.
+
+`profiles.id` is the Supabase Auth user ID, so one Auth email maps to one app profile.
+The stored `account_type` cannot be changed from tourist to guide or vice versa through
+these APIs. Guide onboarding writes the guide-specific fields and language associations
+to `guide_profiles`, `guide_languages`, and `guide_profile_languages`.
 
 To apply the schema to Supabase PostgreSQL, put its PostgreSQL connection URI in
 `DATABASE_URL` in the ignored `.env` file, then run from `backend/`:

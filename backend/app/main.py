@@ -20,6 +20,7 @@ from app.concierge.router import router as concierge_router
 from app.auth.router import router as auth_router
 from app.planner.router import router as planner_router
 from app.railradar.router import router as railradar_router
+from app.guides.router import profile_router, router as guides_router
 from app.schemas.itinerary import ERR_INVALID_REQUEST
 
 logger = logging.getLogger(__name__)
@@ -122,3 +123,5 @@ app.include_router(concierge_router)
 app.include_router(auth_router)
 app.include_router(planner_router)
 app.include_router(railradar_router)
+app.include_router(profile_router)
+app.include_router(guides_router)
