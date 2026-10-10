@@ -1,0 +1,1 @@
+"""Supabase authentication configuration endpoints."""

@@ -5,6 +5,7 @@ Run from backend/:
 """
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 
@@ -16,9 +17,12 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.concierge.router import router as concierge_router
+from app.auth.router import router as auth_router
 from app.planner.router import router as planner_router
 from app.railradar.router import router as railradar_router
 from app.schemas.itinerary import ERR_INVALID_REQUEST
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -52,9 +56,16 @@ _FRONTEND = next(
 
 @app.get("/", include_in_schema=False)
 def frontend():
-    if not _FRONTEND.is_file():
+    candidates = (
+        _FRONTEND,
+        Path.cwd() / "index.html",
+        Path.cwd().parent / "index.html",
+        Path("/app/index.html"),
+    )
+    frontend_file = next((candidate for candidate in candidates if candidate.is_file()), None)
+    if frontend_file is None:
         return JSONResponse(status_code=404, content={"detail": "Frontend file not found."})
-    return FileResponse(_FRONTEND, media_type="text/html")
+    return FileResponse(frontend_file, media_type="text/html")
 
 
 @app.exception_handler(RequestValidationError)
@@ -70,7 +81,11 @@ async def validation_error_handler(_: Request, exc: RequestValidationError):
 
 
 @app.exception_handler(Exception)
-async def safe_error(_: Request, __: Exception):
+async def safe_error(_: Request, exc: Exception):
+    logger.error(
+        "Unhandled API request error",
+        exc_info=(type(exc), exc, exc.__traceback__),
+    )
     return JSONResponse(
         status_code=500,
         content={
@@ -89,5 +104,6 @@ def health():
 
 
 app.include_router(concierge_router)
+app.include_router(auth_router)
 app.include_router(planner_router)
 app.include_router(railradar_router)

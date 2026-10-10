@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 from app.db.base import Base
 from app.db import models  # noqa: F401 - registers models on Base.metadata
+from app.db.connection import normalize_database_url
 
 config = context.config
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
@@ -17,6 +18,7 @@ if config.config_file_name is not None:
 database_url = os.getenv("DATABASE_URL")
 if not database_url:
     raise RuntimeError("Set DATABASE_URL in backend/.env before running Alembic.")
+database_url = normalize_database_url(database_url).render_as_string(hide_password=False)
 config.set_main_option("sqlalchemy.url", database_url.replace("%", "%%"))
 target_metadata = Base.metadata
 

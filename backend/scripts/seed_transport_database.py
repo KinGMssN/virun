@@ -13,6 +13,7 @@ from sqlalchemy.dialects.postgresql import insert
 
 from app.db import models  # noqa: F401 - registers the tables
 from app.db.base import Base
+from app.db.connection import normalize_database_url
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -47,7 +48,7 @@ def main() -> None:
     url = os.getenv("DATABASE_URL")
     if not url:
         raise SystemExit("DATABASE_URL is required; it was not printed or read from source control.")
-    engine = create_engine(url, pool_pre_ping=True)
+    engine = create_engine(normalize_database_url(url), pool_pre_ping=True)
     with engine.begin() as connection:
         stops = _upsert(connection, "transport_stops", _load_rows("stops"), "stop_id")
         options = _upsert(connection, "transport_options", _load_rows("options"), "option_id")

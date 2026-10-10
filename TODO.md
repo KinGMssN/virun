@@ -20,7 +20,8 @@ Updated 2026-10-10. A checked item is limited to what exists and has been verifi
 ## Still required before production
 
 - [ ] Choose and contract a live bus provider that supplies schedules, fares, and inventory; add its credentials and integration.
-- [ ] Decide which account roles to support and select an identity/authentication provider; implement server-side registration, sessions, and authorization. Current frontend role selection and demo checks are not secure authentication.
+- [ ] Add SUPABASE_URL and the anon/public SUPABASE_KEY to local and Render environments, configure Supabase Email Auth redirect URLs, then verify sign-up, confirmation, sign-in, refresh, and sign-out with a real test account.
+- [ ] Define and enforce account roles and server-side authorization for protected workflows. Supabase email/password sign-up and sign-in forms are implemented, but guide/government/admin screens are still previews and are not protected.
 - [ ] Add the Supabase PostgreSQL `DATABASE_URL`, apply `alembic upgrade head`, and verify the migration. Runtime Supabase REST keys are still blank; private-table RLS policies and application CRUD/auth flows remain to be implemented.
 - [ ] Choose a booking provider and implement confirmed booking, cancellation, and status synchronization. Until then, the app is a planner and must not claim a reservation was made.
 - [ ] Choose a payment processor and implement server-side payment intents, verified webhooks, refunds, and state transitions before accepting payments. Do not collect or store card details in this app.

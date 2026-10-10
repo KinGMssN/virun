@@ -11,6 +11,11 @@ pip install -r requirements-dev.txt
 uvicorn app.main:app --reload                             # http://127.0.0.1:8000
 pytest                                                    # no database needed
 ```
+For the standalone frontend/API proxy preview, start the backend on port 8000,
+then from the repository root run:
+```bash
+python backend/scripts/local_frontend_proxy.py             # http://127.0.0.1:8001
+```
 The root URL serves the Virun frontend. Journey search uses `/api/plan`, and the
 chat panel parses free-text requests through `/api/parse-trip` before checking them
 with the planner. API documentation is at `http://127.0.0.1:8000/docs`; bundled
@@ -113,6 +118,17 @@ python scripts/seed_transport_database.py
 `DATABASE_URL` is the database connection URI (including its database password), not
 the Supabase anon API key. Keep both private. The runtime planner uses `SUPABASE_URL`
 and `SUPABASE_KEY` when `TRANSPORT_REPOSITORY=supabase`.
+Use the Supabase PostgreSQL URI (not its API URL or anon key). SQLAlchemy is configured
+to use psycopg 3; `postgres://` and `postgresql://` URLs are normalized automatically.
+If the database password contains reserved URI characters, URL-encode them before
+putting the URI in `.env` or Render's environment settings.
+
+Email/password sign-up and sign-in use Supabase Auth through the public anon key.
+Enable the Email provider in Supabase Authentication settings and allow the local
+callback http://127.0.0.1:8001/#/signin plus the deployed Render origin in the
+Auth URL configuration. SUPABASE_KEY must be the anon/public key; the API refuses
+to expose a service-role/secret key. User login does not yet grant guide, government,
+or admin authorization; those role policies and protected workflows remain pending.
 
 ## Docker and Render
 From the repository root:
