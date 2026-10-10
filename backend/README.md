@@ -12,12 +12,15 @@ pip install -r requirements-dev.txt
 uvicorn app.main:app --reload                             # http://127.0.0.1:8000
 pytest                                                    # no database needed
 ```
+In the monorepo, the backend serves `../frontend/index.html`; a standalone
+backend checkout uses its local `frontend/index.html`. Both serve the UI and its
+image assets from port 8000.
 For the standalone frontend/API proxy preview, start the backend on port 8000,
 then from the repository root run:
 ```bash
 python backend/scripts/local_frontend_proxy.py             # http://127.0.0.1:8001
 ```
-The root URL serves the Virun frontend. Journey search uses `/api/plan`; the chat asks
+The root URL serves the Virun frontend from `../frontend/`. Journey search uses `/api/plan`; the chat asks
 for a destination stay of 1–15 days, parses the request with Groq, checks transport,
 and requests a separate day-by-day sightseeing suggestion. API documentation is at
 `http://127.0.0.1:8000/docs`; bundled

@@ -36,21 +36,34 @@ app = FastAPI(
 origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
 
-_RESOURCES = Path(__file__).resolve().parent.parent / "resources"
+_BACKEND_ROOT = Path(__file__).resolve().parents[1]
+_PROJECT_ROOT = _BACKEND_ROOT.parent
+_FRONTEND_ROOT = next(
+    (
+        candidate
+        for candidate in (
+            _PROJECT_ROOT / "frontend",
+            _BACKEND_ROOT / "frontend",
+            _BACKEND_ROOT,
+        )
+        if (candidate / "index.html").is_file()
+    ),
+    _PROJECT_ROOT / "frontend",
+)
+_RESOURCES = _FRONTEND_ROOT / "resources"
 if _RESOURCES.is_dir():
     app.mount("/resources", StaticFiles(directory=str(_RESOURCES)), name="resources")
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[2]
 _FRONTEND = next(
     (
         candidate
         for candidate in (
-            _PROJECT_ROOT / "index.html",
-            _PROJECT_ROOT / "backend" / "index.html",
+            _FRONTEND_ROOT / "index.html",
+            Path("/app/frontend/index.html"),
         )
         if candidate.is_file()
     ),
-    _PROJECT_ROOT / "index.html",
+    _FRONTEND_ROOT / "index.html",
 )
 
 
@@ -58,9 +71,11 @@ _FRONTEND = next(
 def frontend():
     candidates = (
         _FRONTEND,
+        Path.cwd() / "frontend" / "index.html",
+        Path.cwd().parent / "frontend" / "index.html",
+        Path("/app/frontend/index.html"),
+        _BACKEND_ROOT / "frontend" / "index.html",
         Path.cwd() / "index.html",
-        Path.cwd().parent / "index.html",
-        Path("/app/index.html"),
     )
     frontend_file = next((candidate for candidate in candidates if candidate.is_file()), None)
     if frontend_file is None:

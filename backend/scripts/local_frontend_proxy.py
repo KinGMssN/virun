@@ -12,7 +12,12 @@ API_HOST = "127.0.0.1"
 API_PORT = 8000
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = BACKEND_ROOT.parent
-INDEX_FILE = PROJECT_ROOT / "index.html"
+FRONTEND_ROOT = PROJECT_ROOT / "frontend"
+if not (FRONTEND_ROOT / "index.html").is_file():
+    FRONTEND_ROOT = BACKEND_ROOT / "frontend"
+if not (FRONTEND_ROOT / "index.html").is_file():
+    FRONTEND_ROOT = BACKEND_ROOT
+INDEX_FILE = FRONTEND_ROOT / "index.html"
 LOCAL_ENV_FILE = BACKEND_ROOT / ".env"
 HOP_BY_HOP = {"connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailers", "transfer-encoding", "upgrade", "host"}
 

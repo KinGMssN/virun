@@ -14,8 +14,7 @@ COPY backend/app ./app
 COPY backend/alembic.ini ./alembic.ini
 COPY backend/migrations ./migrations
 COPY backend/scripts ./scripts
-COPY backend/resources ./resources
-COPY index.html /app/index.html
+COPY frontend /app/frontend
 
 RUN useradd --create-home --uid 10001 appuser \
     && chown -R appuser:appuser /app

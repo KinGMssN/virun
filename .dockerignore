@@ -11,5 +11,6 @@ __pycache__
 **/.pytest_cache
 *.py[cod]
 backend/tests
-backend/scripts
-backend/supabase
+backend/frontend
+backend/resources
+backend/index.html

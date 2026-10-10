@@ -14,7 +14,7 @@ Updated 2026-10-10. A checked item is limited to what exists and has been verifi
 - [x] SQLAlchemy models and an Alembic bootstrap migration define the relational app schema, including transport tables.
 - [x] Card entry has been removed from the payment preview; identity and government screens now clearly state that no real provider/access control is connected.
 - [x] Registration and sign-in screens no longer ask for account credentials; the privacy screen explains the backend and Groq data flow.
-- [x] API frontend serving and Docker packaging now point to the existing root `index.html` (the old `Index (2).html` path did not exist).
+- [x] API frontend serving and Docker packaging use the single frontend entry point under `frontend/index.html`.
 - [x] API keys are read from ignored `backend/.env`; `.env.example` contains blank secret placeholders.
 
 ## Still required before production
