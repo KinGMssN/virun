@@ -182,13 +182,25 @@ class TripRequest(UUIDPrimaryKey, Timestamped, Base):
 
 class Itinerary(UUIDPrimaryKey, Timestamped, Base):
     __tablename__ = "itineraries"
-    trip_request_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("trip_requests.id", ondelete="CASCADE"), nullable=False)
+    # Generated sightseeing plans can exist before a transport TripRequest is saved.
+    trip_request_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), ForeignKey("trip_requests.id", ondelete="CASCADE"))
     label: Mapped[str] = mapped_column(String(80), nullable=False)
-    total_fare_inr: Mapped[int] = mapped_column(Integer, nullable=False)
+    itinerary_type: Mapped[str] = mapped_column(String(24), server_default="transport", nullable=False)
+    generated_content: Mapped[dict | None] = mapped_column(JSONB)
+    duration_days: Mapped[int | None] = mapped_column(SmallInteger)
+    duration_nights: Mapped[int | None] = mapped_column(SmallInteger)
+    budget_inr: Mapped[float | None] = mapped_column(Numeric(12, 2))
+    total_fare_inr: Mapped[int | None] = mapped_column(Integer)
     currency: Mapped[str] = mapped_column(String(3), server_default="INR", nullable=False)
-    duration_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
+    duration_minutes: Mapped[int | None] = mapped_column(Integer)
     data_source: Mapped[str] = mapped_column(String(80), nullable=False)
-    __table_args__ = (CheckConstraint("total_fare_inr >= 0 and duration_minutes > 0", name="itinerary_nonnegative"),)
+    __table_args__ = (
+        CheckConstraint("(total_fare_inr is null and duration_minutes is null) or (total_fare_inr is not null and duration_minutes is not null and total_fare_inr >= 0 and duration_minutes > 0)", name="itinerary_nonnegative"),
+        CheckConstraint("itinerary_type in ('transport','sightseeing')", name="itinerary_type"),
+        CheckConstraint("duration_days is null or duration_days between 1 and 15", name="itinerary_duration_days"),
+        CheckConstraint("duration_nights is null or duration_nights between 0 and 30", name="itinerary_duration_nights"),
+        CheckConstraint("budget_inr is null or budget_inr > 0", name="itinerary_budget"),
+    )
 
 
 class ItineraryLeg(UUIDPrimaryKey, Base):

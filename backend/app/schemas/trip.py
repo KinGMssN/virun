@@ -2,6 +2,7 @@
 from datetime import date, datetime
 from enum import Enum
 from typing import Literal, Optional
+from uuid import UUID
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, Field, field_validator
@@ -108,6 +109,8 @@ class GeneratedItinerary(BaseModel):
     destination: str
     duration_days: int = Field(ge=1, le=15)
     days: list[DayPlan]
+    itinerary_id: UUID | None = None
+    saved_to_database: bool = False
 
     @field_validator("days")
     @classmethod

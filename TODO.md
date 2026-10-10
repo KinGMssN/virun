@@ -12,6 +12,7 @@ Updated 2026-10-10. A checked item is limited to what exists and has been verifi
 - [x] Bundled transport data is identified as simulated; bus fares and availability are not represented as live.
 - [x] Render blueprint, Docker configuration, CI workflow, Supabase schema/seed/repository option, and integration setup docs are present.
 - [x] SQLAlchemy models and an Alembic bootstrap migration define the relational app schema, including transport tables.
+- [x] Groq-generated stay plans are persisted as `sightseeing` records in `public.itineraries`, with the generated day plan stored as JSONB and no invented transport fare or duration; the Itinerary page lists plans saved in this browser.
 - [x] Card entry has been removed from the payment preview; identity and government screens now clearly state that no real provider/access control is connected.
 - [x] Registration and sign-in screens no longer ask for account credentials; the privacy screen explains the backend and Groq data flow.
 - [x] API frontend serving and Docker packaging use the single frontend entry point under `frontend/index.html`.
@@ -22,7 +23,7 @@ Updated 2026-10-10. A checked item is limited to what exists and has been verifi
 - [ ] Choose and contract a live bus provider that supplies schedules, fares, and inventory; add its credentials and integration.
 - [ ] Add SUPABASE_URL and the anon/public SUPABASE_KEY to local and Render environments, configure Supabase Email Auth redirect URLs, then verify sign-up, confirmation, sign-in, refresh, and sign-out with a real test account.
 - [ ] Define and enforce account roles and server-side authorization for protected workflows. Supabase email/password sign-up and sign-in forms are implemented, but guide/government/admin screens are still previews and are not protected.
-- [ ] Add the Supabase PostgreSQL `DATABASE_URL`, apply `alembic upgrade head`, and verify the migration. Runtime Supabase REST keys are still blank; private-table RLS policies and application CRUD/auth flows remain to be implemented.
+- [ ] Add the Supabase PostgreSQL `DATABASE_URL` and apply/verify the latest Alembic migration (`alembic upgrade head`; Render's Docker startup runs it automatically). Runtime Supabase REST keys are still blank; private-table RLS policies and account-scoped itinerary retrieval remain to be implemented.
 - [ ] Choose a booking provider and implement confirmed booking, cancellation, and status synchronization. Until then, the app is a planner and must not claim a reservation was made.
 - [ ] Choose a payment processor and implement server-side payment intents, verified webhooks, refunds, and state transitions before accepting payments. Do not collect or store card details in this app.
 - [x] Identity verification controls were removed from the frontend preview; no document submission is offered.

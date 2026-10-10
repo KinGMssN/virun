@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException
 from app.concierge.model_adapter import MockAdapter, ModelError, get_adapter
 from app.concierge.itinerary_service import generate_itinerary
 from app.concierge.service import run_parse
+from app.db.session import DatabaseNotConfigured, save_generated_itinerary
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.schemas.trip import (
     GeneratedItinerary,
@@ -70,7 +71,15 @@ def parse_trip(req: ParseTripRequest):
 def generate_trip_itinerary(req: ItineraryGenerationRequest):
     try:
         adapter = get_adapter()
-        return generate_itinerary(req, adapter)
+        itinerary = generate_itinerary(req, adapter)
+        itinerary_id = save_generated_itinerary(
+            plan=itinerary,
+            duration_nights=req.duration_nights,
+            budget_inr=req.budget_inr,
+        )
+        itinerary.itinerary_id = itinerary_id
+        itinerary.saved_to_database = True
+        return itinerary
     except ModelError as exc:
         log.warning("itinerary generation error code=%s", exc.code)
         status_code = 503 if exc.code == "NOT_CONFIGURED" else 502
@@ -80,4 +89,15 @@ def generate_trip_itinerary(req: ItineraryGenerationRequest):
                 "code": exc.code,
                 "message": "AI itinerary generation is unavailable. Check the Groq configuration and retry.",
             },
+        ) from exc
+    except DatabaseNotConfigured as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "DATABASE_NOT_CONFIGURED", "message": str(exc)},
+        ) from exc
+    except Exception as exc:
+        log.exception("generated itinerary could not be saved")
+        raise HTTPException(
+            status_code=503,
+            detail={"code": "ITINERARY_SAVE_FAILED", "message": "The plan was generated but could not be saved. Check DATABASE_URL and apply the database migration, then retry."},
         ) from exc
