@@ -2,7 +2,7 @@
 
 Transport fares, timestamps and feasibility are calculated by the deterministic planner;
 Groq is used only for natural-language parsing and AI-generated sightseeing suggestions.
-Bundled transport data is **SIMULATED** (fictional schedules/fares/availability).
+No transport fixture is used by default. Set `TRANSPORT_REPOSITORY=json` only when you explicitly want the development sample dataset.
 
 ## Run it
 ```bash
@@ -20,9 +20,10 @@ then from the repository root run:
 ```bash
 python backend/scripts/local_frontend_proxy.py             # http://127.0.0.1:8001
 ```
-The root URL serves the Virun frontend from `../frontend/`. Journey search uses `/api/plan`; the chat asks
-for a destination stay of 1–15 days, parses the request with Groq, checks transport,
-and requests a separate day-by-day sightseeing suggestion. API documentation is at
+The root URL serves the Virun frontend from `../frontend/`. General text and voice
+questions use `/api/chat` and Groq, with up to eight recent conversation turns. Trip
+requests ask for a 1–15 day destination stay, parse details with Groq, check transport,
+and request a separate day-by-day sightseeing suggestion. API documentation is at
 `http://127.0.0.1:8000/docs`; bundled
 images are served under `/resources/`. Copy `.env.example` to `.env` to configure
 the concierge and integrations. The planner works with bundled JSON data without
@@ -41,6 +42,9 @@ curl http://127.0.0.1:8000/api/transport/options
 | Method | Path | Notes |
 |---|---|---|
 | POST | `/api/plan` | Body = `TripRequest`. 200 + `itineraries`, or `{"error": {...}}` (404 `NO_FEASIBLE_ROUTE`, 422 `INVALID_REQUEST` / `UNKNOWN_LOCATION`) |
+| POST | `/api/chat` | Groq-backed assistant reply; accepts a message and up to 8 recent turns |
+| POST | `/api/parse-trip` | Groq extracts trip constraints and asks for missing details |
+| POST | `/api/generate-itinerary` | Groq creates validated sightseeing suggestions for 1–15 days |
 | POST | `/api/plan/recover` | Body = `{"trip_request": TripRequest, "unavailable_leg_ids": [...]}`; replans while excluding disrupted legs |
 | GET | `/api/transport/options` | All records incl. cancelled/sold-out, with `data_source`. Optional filters: `origin_stop_id`, `destination_stop_id`, `mode` |
 | GET | `/api/rail/stations?q=Visakhapatnam` | Real railway station lookup through RailRadar; requires `RAILRADAR_API_KEY` |
@@ -83,7 +87,7 @@ It never raises for bad input; it returns `PlanResponse(error=...)`. Do **not** 
 Weights and buffers live in `PlannerConfig`.
 
 ## Repository switch (JSON → Supabase)
-`TRANSPORT_REPOSITORY=json` (default) or `supabase` (set `SUPABASE_URL`, `SUPABASE_KEY`).
+`TRANSPORT_REPOSITORY=empty` (default; no fabricated results), `json` (explicit sample dataset for development), or `supabase` (set `SUPABASE_URL`, `SUPABASE_KEY`).
 For this read-only planner repository, use the Supabase anon/public key with the included
 read-only row-level security policies; never use a `service_role` key in this app.
 The SQL file under `supabase/migrations/` is the legacy transport-only schema. New schema
@@ -114,7 +118,7 @@ To apply the schema to Supabase PostgreSQL, put its PostgreSQL connection URI in
 alembic upgrade head
 ```
 
-To load the clearly labeled planner demo records after migration, run:
+For local development only, the demo seed script can load simulated records. Do not use it for live data:
 
 ```bash
 python scripts/seed_transport_database.py
@@ -155,10 +159,10 @@ keys as secrets and does not store their values in source control. The backend C
 3.11 and 3.12 and builds the Docker image.
 
 ## Known limitations
-* Bundled planner data is synthetic, covers one corridor (Visakhapatnam to Hyderabad), and uses fixed dates. RailRadar results are separate and appear only when its key is configured.
-* RailRadar can provide train timetables and live running status when configured. It does not provide fare quotes, seat counts or booking in this integration. Bus data remains synthetic; passenger count does not check seat inventory.
+* The planner has no transport data by default. Supabase rows labeled DEMO, SAMPLE, SIMULATED, or MOCK are excluded from results. RailRadar train timetable search is available through `/api/rail`; fares, seats, and booking are unavailable.
+* RailRadar can provide train timetables and live running status when configured. It does not provide fare quotes, seat counts or booking in this integration. Bus schedules are not connected.
 * Only whole-minute precision; one flat per-passenger fare rule; no taxes/fees besides the luggage fee.
-* Place names resolve via exact stop id / name / alias match (no fuzzy matching). "Hyderabad" resolves to the hub `HYD-DEMO`.
+* Place names resolve via exact stop id / name / alias match (no fuzzy matching). Location resolution uses records from the selected repository.
 * Search is capped (3 legs / 500 candidates) to stay fast.
 * Supabase pagination and schema mapping are covered by offline fake-client tests; the
   repository has not been exercised against a live database. RailRadar calls also need

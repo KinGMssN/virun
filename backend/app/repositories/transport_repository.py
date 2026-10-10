@@ -131,6 +131,9 @@ class SupabaseTransportRepository(TransportRepository):
     def list_options(self) -> list[TransportOption]:
         out = []
         for row in self._fetch_all("transport_options"):
+            source = str(row.get("data_source") or "").upper()
+            if any(marker in source for marker in ("DEMO", "SAMPLE", "SIMULATED", "MOCK")):
+                continue
             try:
                 out.append(TransportOption.model_validate(row))
             except ValidationError as exc:
@@ -138,7 +141,13 @@ class SupabaseTransportRepository(TransportRepository):
         return out
 
     def list_stops(self) -> list[Stop]:
-        return [Stop.model_validate(r) for r in self._fetch_all("transport_stops")]
+        rows = self._fetch_all("transport_stops")
+        return [
+            Stop.model_validate(row)
+            for row in rows
+            if not any(marker in str(row.get("data_source") or "").upper()
+                       for marker in ("DEMO", "SAMPLE", "SIMULATED", "MOCK"))
+        ]
 
     def metadata(self) -> dict[str, Any]:
         return {"dataset_label": "SUPABASE", "disclaimer": "Records come from the shared database."}
@@ -146,9 +155,14 @@ class SupabaseTransportRepository(TransportRepository):
 
 @lru_cache(maxsize=1)
 def get_default_repository() -> TransportRepository:
-    kind = os.getenv("TRANSPORT_REPOSITORY", "json").lower()
+    kind = os.getenv("TRANSPORT_REPOSITORY", "empty").lower()
     if kind == "supabase":
         return SupabaseTransportRepository()
     if kind == "json":
         return JsonTransportRepository(os.getenv("TRANSPORT_DATA_PATH") or None)
-    raise ValueError(f"Unknown TRANSPORT_REPOSITORY '{kind}' (use 'json' or 'supabase')")
+    if kind == "empty":
+        return InMemoryTransportRepository([], [], {
+            "dataset_label": "NO TRANSPORT SOURCE CONFIGURED",
+            "disclaimer": "No transport records are configured. Connect a live provider or database.",
+        })
+    raise ValueError(f"Unknown TRANSPORT_REPOSITORY '{kind}' (use 'empty', 'json', or 'supabase')")

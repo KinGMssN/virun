@@ -4,6 +4,8 @@ import re
 
 from openai import APITimeoutError, OpenAI, RateLimitError
 
+from app.concierge.prompts import CHAT_SYSTEM_PROMPT
+
 
 class ModelError(Exception):
     """Safe error carrying only a code, never raw provider details."""
@@ -47,6 +49,30 @@ class GroqAdapter:
 
     def generate_itinerary(self, prompt: str) -> str:
         return self._complete_json(prompt)
+
+    def chat(self, history: list[dict[str, str]], message: str) -> str:
+        messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
+        messages.extend(history)
+        messages.append({"role": "user", "content": message})
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=0.4,
+                max_completion_tokens=700,
+            )
+            reply = response.choices[0].message.content
+            if not reply or not reply.strip():
+                raise ModelError("INVALID_MODEL_OUTPUT")
+            return reply.strip()
+        except ModelError:
+            raise
+        except APITimeoutError:
+            raise ModelError("MODEL_TIMEOUT")
+        except RateLimitError:
+            raise ModelError("QUOTA_EXCEEDED")
+        except Exception:
+            raise ModelError("MODEL_ERROR")
 
 
 class MockAdapter:
