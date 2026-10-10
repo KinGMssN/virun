@@ -1,7 +1,8 @@
 # TBS RoamAgent — Deterministic Route Planner (Member 3)
 
-All fares, timestamps and feasibility are calculated here. **No LLM is involved.**
-Bundled data is **SIMULATED** (fictional schedules/fares/availability).
+Transport fares, timestamps and feasibility are calculated by the deterministic planner;
+Groq is used only for natural-language parsing and AI-generated sightseeing suggestions.
+Bundled transport data is **SIMULATED** (fictional schedules/fares/availability).
 
 ## Run it
 ```bash
@@ -16,9 +17,10 @@ then from the repository root run:
 ```bash
 python backend/scripts/local_frontend_proxy.py             # http://127.0.0.1:8001
 ```
-The root URL serves the Virun frontend. Journey search uses `/api/plan`, and the
-chat panel parses free-text requests through `/api/parse-trip` before checking them
-with the planner. API documentation is at `http://127.0.0.1:8000/docs`; bundled
+The root URL serves the Virun frontend. Journey search uses `/api/plan`; the chat asks
+for a destination stay of 1–15 days, parses the request with Groq, checks transport,
+and requests a separate day-by-day sightseeing suggestion. API documentation is at
+`http://127.0.0.1:8000/docs`; bundled
 images are served under `/resources/`. Copy `.env.example` to `.env` to configure
 the concierge and integrations. The planner works with bundled JSON data without
 external credentials. Set `RAILRADAR_API_KEY` locally and as a private Render
@@ -138,8 +140,11 @@ docker run --rm -p 8000:8000 -e CORS_ORIGINS=http://localhost:8000 virun
 ```
 Open `http://localhost:8000`. For Render, use the included `render.yaml` blueprint and
 set `CORS_ORIGINS`, `GROQ_API_KEY`, `GROQ_MODEL`, and the private `RAILRADAR_API_KEY` in the
-service environment. The blueprint requests the RailRadar key as a secret and does not
-store its value in source control. The backend CI workflow runs the test suite on Python
+service environment. Set `GROQ_API_KEY` to your Groq API key and leave `USE_MOCK_PARSER`
+unset or `false` to enable Groq. The blueprint sets `GROQ_MODEL` to
+`openai/gpt-oss-20b`. Set `MODEL_TIMEOUT_SECONDS` to a private service variable only if
+you need a non-default timeout (default 60 seconds). The blueprint requests provider
+keys as secrets and does not store their values in source control. The backend CI workflow runs the test suite on Python
 3.11 and 3.12 and builds the Docker image.
 
 ## Known limitations

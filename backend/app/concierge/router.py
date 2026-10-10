@@ -1,14 +1,22 @@
 import os
+import logging
 
 from dotenv import load_dotenv
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.concierge.model_adapter import MockAdapter, ModelError, get_adapter
+from app.concierge.itinerary_service import generate_itinerary
 from app.concierge.service import run_parse
-from app.schemas.trip import ParseTripRequest, ParseTripResponse
+from app.schemas.trip import (
+    GeneratedItinerary,
+    ItineraryGenerationRequest,
+    ParseTripRequest,
+    ParseTripResponse,
+)
 
 load_dotenv()
 router = APIRouter(prefix="/api")
+log = logging.getLogger("concierge")
 
 FALLBACK_CODES = {"QUOTA_EXCEEDED", "MODEL_TIMEOUT", "MODEL_ERROR"}
 
@@ -32,3 +40,20 @@ def parse_trip(req: ParseTripRequest):
             mock.fallback = "mock_parser"
             return mock
     return res
+
+
+@router.post("/generate-itinerary", response_model=GeneratedItinerary)
+def generate_trip_itinerary(req: ItineraryGenerationRequest):
+    try:
+        adapter = get_adapter()
+        return generate_itinerary(req, adapter)
+    except ModelError as exc:
+        log.warning("itinerary generation error code=%s", exc.code)
+        status_code = 503 if exc.code == "NOT_CONFIGURED" else 502
+        raise HTTPException(
+            status_code=status_code,
+            detail={
+                "code": exc.code,
+                "message": "AI itinerary generation is unavailable. Check the Groq configuration and retry.",
+            },
+        ) from exc

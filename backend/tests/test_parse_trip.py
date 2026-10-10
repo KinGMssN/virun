@@ -14,7 +14,7 @@ BASE = {"message": "test", "timezone": "Asia/Kolkata", "reference_date": "2026-1
 FULL = {
     "origin": "Visakhapatnam", "destination": "Hitech City, Hyderabad",
     "relative_date_text": "tomorrow", "departure_date": None, "arrival_time": "09:00",
-    "arrival_next_day": False, "passengers": 1, "budget_inr": 1200,
+    "arrival_next_day": False, "duration_days": 3, "passengers": 1, "budget_inr": 1200,
     "bus_preference": "sleeper", "ac_preference": "preferred",
     "has_luggage": True, "priority": "balanced",
 }
@@ -45,6 +45,7 @@ def test_complete_request_ready(monkeypatch):
     t = r["trip_request"]
     assert t["departure_date"] == "2026-10-11"
     assert t["arrival_deadline"] == "2026-10-11T09:00:00+05:30"
+    assert t["duration_days"] == 3
     assert t["bus_preference"] == "sleeper"
 
 
@@ -69,6 +70,33 @@ def test_ambiguous_time_asks(monkeypatch):
     r = post(monkeypatch, FakeAdapter({**FULL, "arrival_time": None}))
     assert r["missing_fields"] == ["arrival_deadline"]
     assert "What time must you arrive?" in r["clarification_questions"]
+
+
+def test_missing_duration_asks_user(monkeypatch):
+    r = post(monkeypatch, FakeAdapter({**FULL, "duration_days": None}))
+
+    assert r["status"] == "needs_clarification"
+    assert r["missing_fields"] == ["duration_days"]
+    assert "1 to 15 days" in r["clarification_questions"][0]
+
+
+@pytest.mark.parametrize("duration", [0, 16, "many"])
+def test_invalid_duration_asks_for_supported_range(monkeypatch, duration):
+    r = post(monkeypatch, FakeAdapter({**FULL, "duration_days": duration}))
+
+    assert r["status"] == "needs_clarification"
+    assert r["missing_fields"] == ["duration_days"]
+
+
+def test_form_duration_overrides_model_extraction(monkeypatch):
+    r = post(
+        monkeypatch,
+        FakeAdapter({**FULL, "duration_days": 2}),
+        {**BASE, "message": "Trip to Goa [trip-days: 5]"},
+    )
+
+    assert r["status"] == "ready"
+    assert r["trip_request"]["duration_days"] == 5
 
 
 def test_relative_date_without_reference_date(monkeypatch):
@@ -132,7 +160,7 @@ def test_model_failures_are_safe(monkeypatch, code):
 def test_quota_falls_back_to_mock(monkeypatch):
     monkeypatch.setattr(router_module, "get_adapter", lambda: FakeAdapter(ModelError("QUOTA_EXCEEDED")))
     monkeypatch.setenv("ENABLE_MOCK_FALLBACK", "true")
-    body = {**BASE, "message": "from Vizag to Hyderabad tomorrow, arrive before 9 AM, sleeper bus"}
+    body = {**BASE, "message": "from Vizag to Hyderabad tomorrow, arrive before 9 AM, sleeper bus for 3 days"}
     r = client.post("/api/parse-trip", json=body).json()
     assert r["fallback"] == "mock_parser"
     assert r["status"] == "ready"
@@ -142,7 +170,7 @@ def test_quota_falls_back_to_mock(monkeypatch):
 def test_mock_parser_does_not_include_relative_date_in_destination(monkeypatch):
     body = {
         **BASE,
-        "message": "From Visakhapatnam to Hyderabad tomorrow, arrive before 9 AM",
+        "message": "From Visakhapatnam to Hyderabad tomorrow, arrive before 9 AM for 3 days",
     }
     response = post(monkeypatch, MockAdapter(), body)
     assert response["status"] == "ready"
@@ -153,7 +181,7 @@ def test_mock_parser_does_not_include_relative_date_in_destination(monkeypatch):
 def test_mock_parser_recognizes_next_day_arrival(monkeypatch):
     body = {
         **BASE,
-        "message": "From Visakhapatnam to Hyderabad tomorrow, arrive next day before 9 AM",
+        "message": "From Visakhapatnam to Hyderabad tomorrow, arrive next day before 9 AM for 3 days",
     }
     response = post(monkeypatch, MockAdapter(), body)
     assert response["status"] == "ready"
@@ -203,3 +231,10 @@ def test_telugu_message_passes_through_adapter(monkeypatch):
     r = post(monkeypatch, FakeAdapter({**FULL, "origin": "Visakhapatnam", "destination": "Hyderabad"}), body)
     assert r["status"] == "ready"
 
+
+def test_duration_from_message_is_used_when_model_omits_it(monkeypatch):
+    body = {**BASE, "message": "From Visakhapatnam to Goa, tomorrow, arrive 8 PM, 5 days"}
+    response = post(monkeypatch, FakeAdapter({**FULL, "duration_days": None}), body)
+
+    assert response["status"] == "ready"
+    assert response["trip_request"]["duration_days"] == 5

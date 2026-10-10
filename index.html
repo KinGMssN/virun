@@ -39,6 +39,51 @@
 <button id="bot" class="bot" aria-label="Open Virun travel chat"><span class="bot-bob"><img id="botFace" class="bot-face" alt=""></span></button><aside id="botPanel" class="bot-panel" aria-label="Virun travel chat"><div class="bot-panel-head"><img id="botAvatar" class="bot-panel-avatar" alt="Virun mascot"><div><h2>Ask Virun</h2><p id="botStatus">Choose a quick question.</p></div></div><div class="chips"><button class="chip" data-reply="Choose a city in Explore, then use the trip planner to shape a three-day route.">What do you want to explore?</button><button class="chip" data-reply="Start with your city, preferred pace and must-see places. The itinerary page shows the three-day structure.">Plan a 3-day trip</button><button class="chip" data-reply="Open Guides to compare languages, city expertise, online help and offline companion pricing.">Find a guide</button><button class="chip" data-reply="Pack for the weather and planned activities. Keep identity documents, water and a power bank easy to reach.">What should I pack?</button></div><form id="botTripForm" class="field" style="margin-top:14px"><label for="botTripMessage">Describe a trip</label><textarea id="botTripMessage" required maxlength="1000" placeholder="From Visakhapatnam to Hyderabad tomorrow, arrive before 9 AM"></textarea><button class="btn small" type="submit">Parse and check routes</button></form><div id="botReply" class="bot-reply" aria-live="polite"></div></aside><div class="cursor-dot" id="cursorDot" aria-hidden="true"></div><div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
 <script>
 (function(){'use strict';
+var botTripForm=document.getElementById('botTripForm');
+if(botTripForm){
+var daysField=document.createElement('div');
+daysField.className='field';
+daysField.innerHTML='<label for="botTripDays">Days at destination (1–15)</label><input id="botTripDays" type="number" min="1" max="15" step="1" required>';
+botTripForm.insertBefore(daysField,botTripForm.querySelector('button[type="submit"]'));
+document.addEventListener('submit',function(e){
+if(!e.target||e.target.id!=='botTripForm')return;
+e.preventDefault();
+e.stopImmediatePropagation();
+var form=e.target,message=document.getElementById('botTripMessage'),days=document.getElementById('botTripDays'),submit=form.querySelector('button[type="submit"]'),reply=document.getElementById('botReply'),status=document.getElementById('botStatus'),original=message.value.trim(),requestMessage=original+' [trip-days: '+days.value+']';
+submit.disabled=true;
+reply.textContent='Understanding your trip request...';
+reply.classList.add('show');
+reply.style.whiteSpace='pre-line';
+status.textContent='Parsing the trip with Groq.';
+async function postJson(url,body,label){
+var response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),data;
+try{data=await response.json()}catch(error){throw new Error(label+' returned an unreadable response.')}
+if(!response.ok){var detail=data.detail;if(detail&&typeof detail==='object')detail=detail.message||detail.code||JSON.stringify(detail);throw new Error((detail||label+' failed')+' [HTTP '+response.status+']')}
+return data
+}
+(async function(){
+var dateParts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),dateValues={};
+dateParts.forEach(function(part){if(part.type!=='literal')dateValues[part.type]=part.value});
+var parsed=await postJson('/api/parse-trip',{message:requestMessage,timezone:'Asia/Kolkata',reference_date:dateValues.year+'-'+dateValues.month+'-'+dateValues.day});
+if(parsed.status==='needs_clarification'){reply.textContent='A few details are needed: '+(parsed.clarification_questions||[]).join(' ');status.textContent='Please add the missing trip details.';return}
+if(parsed.status!=='ready'||!parsed.trip_request){var code=parsed.error_code;if(code==='NOT_CONFIGURED')throw new Error('Groq is not configured in Render. Add GROQ_API_KEY to the service environment and redeploy.');if(code==='QUOTA_EXCEEDED')throw new Error('The Groq account has reached its request limit. Check the Groq API key and usage.');if(code==='MODEL_TIMEOUT')throw new Error('Groq took too long to respond. Please retry.');throw new Error(code||'Groq could not understand the trip request.')}
+var trip=parsed.trip_request,planRequest=Object.assign({},trip);
+if(planRequest.ac_preference==='no_preference')planRequest.ac_preference='none';
+if(planRequest.priority==='comfort')planRequest.priority='balanced';
+status.textContent='Checking transport routes and generating your itinerary with Groq.';
+var routePromise=postJson('/api/plan',planRequest,'Transport planner').then(function(plan){
+if(!Array.isArray(plan.itineraries)||!plan.itineraries.length)return 'No feasible transport routes were found in the current dataset.';
+return plan.itineraries.map(function(item){return item.label+' | INR '+item.total_fare_inr}).join('\n')
+}).catch(function(error){return 'Transport routes unavailable: '+error.message});
+var itineraryPromise=postJson('/api/generate-itinerary',{destination:trip.destination,duration_days:trip.duration_days,preferences:original},'Groq itinerary generator');
+var results=await Promise.all([routePromise,itineraryPromise]),routeSummary=results[0],itinerary=results[1];
+var lines=['Transport route options (simulated):',routeSummary,'','AI-generated '+itinerary.duration_days+'-day sightseeing suggestions for '+itinerary.destination+' (verify details before travel):'];
+itinerary.days.forEach(function(day){lines.push('','Day '+day.day+': '+day.title,'Morning: '+day.morning,'Afternoon: '+day.afternoon,'Evening: '+day.evening)});
+reply.textContent=lines.join('\n');
+status.textContent='Transport routes and day-by-day itinerary are ready.'
+})().catch(function(error){reply.textContent='Could not create your trip plan: '+error.message;status.textContent='The request needs attention.'}).finally(function(){submit.disabled=false})
+},true);
+}
 var city='Hyderabad',userName='Traveler',flightTimer=null,particles=[],raf=null,authSession=null;
 try{authSession=JSON.parse(localStorage.getItem('virun.auth.session')||'null');if(authSession&&authSession.user)userName=(authSession.user.user_metadata&&authSession.user.user_metadata.display_name)||authSession.user.email||'Traveler'}catch(e){authSession=null}
 var imageRoot=location.pathname.indexOf('/spaces/v2/')!==-1?'assets/resources/images/':'resources/images/';

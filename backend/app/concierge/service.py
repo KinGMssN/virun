@@ -12,12 +12,13 @@ from app.schemas.trip import (
 
 log = logging.getLogger("concierge")
 
-REQUIRED = ["origin", "destination", "departure_date", "arrival_deadline"]
+REQUIRED = ["origin", "destination", "departure_date", "arrival_deadline", "duration_days"]
 QUESTIONS = {
     "origin": "Where will your journey start?",
     "destination": "Where do you want to go?",
     "departure_date": "Which date do you want to travel?",
     "arrival_deadline": "What time must you arrive?",
+    "duration_days": "How many days do you want to spend on the trip? Choose 1 to 15 days.",
     "passengers": "How many passengers are travelling (1 to 10)?",
     "budget_inr": "Please enter a valid budget in rupees.",
 }
@@ -104,7 +105,7 @@ def _get_data(adapter, prompt: str) -> dict:
 
 
 def run_parse(req: ParseTripRequest, adapter) -> ParseTripResponse:
-    prompt = build_prompt(req.message, str(req.reference_date), req.timezone)
+    prompt = build_prompt(req.message, str(req.reference_date), req.timezone, req.duration_days)
     try:
         data = _get_data(adapter, prompt)
     except ModelError as e:
@@ -137,12 +138,27 @@ def run_parse(req: ParseTripRequest, adapter) -> ParseTripResponse:
     raw_budget = data.get("budget_inr")
     budget = to_number(raw_budget)
     budget_invalid = raw_budget is not None and budget is None
+    form_duration = re.search(r"\[trip-days:\s*(\d{1,2})\]", req.message, re.I)
+    stated_duration = re.search(r"\b(\d{1,2})\s*days?\b", req.message, re.I)
+    raw_duration = req.duration_days
+    if raw_duration is None:
+        if form_duration:
+            raw_duration = form_duration.group(1)
+        elif stated_duration:
+            raw_duration = stated_duration.group(1)
+        else:
+            raw_duration = data.get("duration_days")
+    duration_days = to_int(raw_duration)
+    duration_invalid = raw_duration is not None and (
+        duration_days is None or not 1 <= duration_days <= 15
+    )
 
     partial = {
         "origin": (data.get("origin") or None),
         "destination": (data.get("destination") or None),
         "departure_date": dep.isoformat() if dep else None,
         "arrival_deadline": deadline.isoformat() if deadline else None,
+        "duration_days": duration_days,
         "timezone": req.timezone,
         "passengers": passengers,
         "budget_inr": budget,
@@ -155,6 +171,8 @@ def run_parse(req: ParseTripRequest, adapter) -> ParseTripResponse:
     problems = [f for f in REQUIRED if not partial.get(f)]
     if budget_invalid or (budget is not None and not (0 < budget <= 100000)):
         problems.append("budget_inr")
+    if duration_invalid and "duration_days" not in problems:
+        problems.append("duration_days")
     if not (1 <= passengers <= 10):
         problems.append("passengers")
 

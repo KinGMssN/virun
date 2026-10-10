@@ -28,7 +28,8 @@ class Priority(str, Enum):
 
 
 class ParseTripRequest(BaseModel):
-    message: str = Field(min_length=1, max_length=1000)
+    message: str = Field(min_length=1, max_length=1020)
+    duration_days: Optional[int] = Field(default=None, ge=1, le=15)
     timezone: str = "Asia/Kolkata"
     reference_date: Optional[date] = None
 
@@ -55,6 +56,7 @@ class TripRequest(BaseModel):
     destination: str = Field(min_length=1)
     departure_date: date
     arrival_deadline: datetime
+    duration_days: int = Field(ge=1, le=15)
     timezone: str = "Asia/Kolkata"
     passengers: int = Field(default=1, ge=1, le=10)
     budget_inr: Optional[float] = Field(default=None, gt=0, le=100000)
@@ -79,3 +81,36 @@ class ParseTripResponse(BaseModel):
     clarification_questions: list[str] = []
     error_code: Optional[str] = None
     fallback: Optional[str] = None  # "manual_entry" or "mock_parser"
+
+
+class ItineraryGenerationRequest(BaseModel):
+    destination: str = Field(min_length=1, max_length=120)
+    duration_days: int = Field(ge=1, le=15)
+    preferences: Optional[str] = Field(default=None, max_length=1000)
+
+    @field_validator("destination")
+    @classmethod
+    def strip_destination(cls, value: str) -> str:
+        return value.strip()
+
+
+class DayPlan(BaseModel):
+    day: int = Field(ge=1, le=15)
+    title: str = Field(min_length=1, max_length=120)
+    morning: str = Field(min_length=1, max_length=500)
+    afternoon: str = Field(min_length=1, max_length=500)
+    evening: str = Field(min_length=1, max_length=500)
+
+
+class GeneratedItinerary(BaseModel):
+    destination: str
+    duration_days: int = Field(ge=1, le=15)
+    days: list[DayPlan]
+
+    @field_validator("days")
+    @classmethod
+    def validate_day_count(cls, days: list[DayPlan], info):
+        expected = info.data.get("duration_days")
+        if expected is not None and [day.day for day in days] != list(range(1, expected + 1)):
+            raise ValueError("days must cover the requested trip duration in order")
+        return days

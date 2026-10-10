@@ -22,11 +22,11 @@ class GroqAdapter:
         self.client = OpenAI(
             api_key=key,
             base_url="https://api.groq.com/openai/v1",
-            timeout=float(os.getenv("MODEL_TIMEOUT_SECONDS", "15")),
+            timeout=float(os.getenv("MODEL_TIMEOUT_SECONDS", "60")),
             max_retries=0,
         )
 
-    def extract(self, prompt: str) -> str:
+    def _complete_json(self, prompt: str) -> str:
         try:
             r = self.client.chat.completions.create(
                 model=self.model,
@@ -42,6 +42,12 @@ class GroqAdapter:
         except Exception:
             raise ModelError("MODEL_ERROR")
 
+    def extract(self, prompt: str) -> str:
+        return self._complete_json(prompt)
+
+    def generate_itinerary(self, prompt: str) -> str:
+        return self._complete_json(prompt)
+
 
 class MockAdapter:
     """Simple rule-based parser used when the model is unavailable.
@@ -53,6 +59,7 @@ class MockAdapter:
         out = {
             "origin": None, "destination": None, "relative_date_text": None,
             "departure_date": None, "arrival_time": None, "arrival_next_day": False,
+            "duration_days": None,
             "passengers": None, "budget_inr": None, "bus_preference": None,
             "ac_preference": None, "has_luggage": None, "priority": None,
         }
@@ -69,6 +76,9 @@ class MockAdapter:
                 break
         if re.search(r"\b(?:overnight|next day|following day)\b", low):
             out["arrival_next_day"] = True
+        duration = re.search(r"\b(\d{1,2})\s*days?\b", low)
+        if duration:
+            out["duration_days"] = int(duration[1])
         t = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", low)
         if t:
             h, mi, ap = int(t[1]), int(t[2] or 0), t[3]
