@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virun — Active trip</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-nav="app" data-active="active-trip.html">
+<a class="skip" href="#main">Skip to content</a>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="weather" aria-hidden="true"></canvas>
+<div id="nav"></div>
+<main id="main">
+<section class="app-page"><div class="app-shell"><div class="page-head"><div><p class="eyebrow"><span data-fill="city"></span> trip</p><h1>Active trip</h1><p>See the current leg, check-in status and safety controls.</p></div></div><div class="grid two"><div class="map-status"><div><span class="tag accent">Route status</span><h2><span data-fill="city"></span> day 1</h2></div><div class="pulse" aria-hidden="true"></div><div><strong>Current leg: city orientation</strong><p>Live map rendering is not connected in this frontend demo.</p></div></div><article class="card"><h2>Trip controls</h2><div class="list"><div class="list-row"><div><h3>Check-in</h3><p>Mark the current stop as reached</p></div><a class="btn small" href="trip-chat.html">Check in</a></div><div class="list-row"><div><h3>Guide chat</h3><p>Open the trip conversation</p></div><a class="btn secondary small" href="trip-chat.html">Open chat</a></div></div><a class="btn sos" href="sos.html" style="margin-top:20px">Open SOS page</a></article></div></div></section>
+</main>
+<div id="mobileNav"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/bot.js"></script>
+
+<script src="js/boot.js"></script>
+
+</body>
+</html>

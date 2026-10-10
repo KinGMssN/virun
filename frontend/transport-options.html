@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virun — Choose transport</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-nav="app" data-active="transport-options.html">
+<a class="skip" href="#main">Skip to content</a>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="weather" aria-hidden="true"></canvas>
+<div id="nav"></div>
+<main id="main">
+<section class="app-page"><div class="app-shell"><div class="page-head"><div><p class="eyebrow"><span data-fill="city"></span> trip</p><h1>Choose a train or bus</h1><p><span id="routeLine"></span></p></div></div><div class="notice mock-banner"><div><strong>Mock availability only</strong><br><span>Times, fares and seats are sample frontend values—not live operator data.</span></div><a class="btn secondary small" href="journey-search.html">Edit route</a></div><div class="grid two" id="transportList"></div></div></section>
+</main>
+<div id="mobileNav"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/bot.js"></script>
+
+<script src="js/boot.js"></script>
+<script>(function(){var V=window.Virun,D=window.VirunData;var j=V.store.getJSON('journey',{from:'Visakhapatnam',to:'Hyderabad',date:'',mode:'all'});function fmtDate(){if(!j.date)return 'Choose a date';var d=new Date(j.date+'T12:00:00');return isNaN(d)?j.date:d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});}document.getElementById('routeLine').textContent=j.from+' to '+j.to+' \u00b7 '+fmtDate();var items=D.mockTransportOptions.filter(function(o){return j.mode==='all'||o.kind.toLowerCase()===j.mode;});document.getElementById('transportList').innerHTML=items.map(function(o){return '<article class="card transport-card"><div class="transport-top"><div><span class="tag accent">'+o.kind+'</span><h2 style="margin-top:12px">'+o.name+'</h2><p>'+o.className+'</p></div><span class="tag">MOCK</span></div><div class="transport-time"><div><strong>'+o.depart+'</strong><small style="display:block;color:var(--muted)">'+j.from+'</small></div><span class="route-line" aria-hidden="true"></span><div><strong>'+o.arrive+'</strong><small style="display:block;color:var(--muted)">'+j.to+'</small></div></div><div class="transport-meta"><div><small>Duration</small><strong>'+o.duration+'</strong></div><div><small>Fare</small><strong>\u20b9'+o.fare.toLocaleString('en-IN')+'</strong></div><div><small>Seats shown</small><strong>'+o.seats+'</strong></div></div><button class="btn '+(o.kind==='Bus'?'secondary':'')+'" type="button" data-transport="'+o.id+'">Choose and continue</button></article>'}).join('');})();</script>
+</body>
+</html>

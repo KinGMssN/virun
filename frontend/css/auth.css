@@ -1,0 +1,11 @@
+.auth-wrap{min-height:calc(100vh - 66px);display:grid;place-items:center;padding:48px 20px;background-image:linear-gradient(90deg,color-mix(in srgb,var(--paper) 93%,transparent),color-mix(in srgb,var(--paper) 82%,transparent)),var(--auth-image);background-size:cover;background-position:center}
+.auth-card{width:min(600px,100%);background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:30px}
+.auth-card h1{font-size:2.2rem;line-height:1.1;margin:0 0 10px;letter-spacing:-.04em}
+.auth-card>p{color:var(--muted);margin:0 0 24px}
+.role-card{display:block;text-align:left;width:100%;margin-bottom:12px}
+.role-card strong{display:block;font-size:1.1rem}
+.role-card span{color:var(--muted);font-size:.9rem}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.choice{position:relative;overflow:hidden;min-height:150px;padding:0}
+.choice img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.choice span{position:absolute;inset:auto 0 0;padding:16px;color:#fff;font-weight:800;background:rgba(8,25,32,.72)}

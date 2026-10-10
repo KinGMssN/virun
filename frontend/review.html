@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virun — Trip feedback</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-nav="app" data-active="review.html">
+<a class="skip" href="#main">Skip to content</a>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="weather" aria-hidden="true"></canvas>
+<div id="nav"></div>
+<main id="main">
+<section class="app-page"><div class="app-shell"><div class="page-head"><div><p class="eyebrow"><span data-fill="city"></span> trip</p><h1>Trip feedback</h1><p>Complete the feedback structure after the trip. No sample reviews are displayed.</p></div></div><form class="card" data-goto="trip-history.html"><div class="field"><label>What went well?</label><textarea></textarea></div><div class="field"><label>What should improve?</label><textarea></textarea></div><div class="field"><label>Would you use the same guide mode again?</label><select><option>Select an answer</option><option>Yes</option><option>No</option><option>Not sure</option></select></div><button class="btn" type="submit">Continue to trip history</button></form></div></section>
+</main>
+<div id="mobileNav"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/bot.js"></script>
+
+<script src="js/boot.js"></script>
+
+</body>
+</html>
