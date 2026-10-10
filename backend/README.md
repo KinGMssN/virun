@@ -125,12 +125,16 @@ to use psycopg 3; `postgres://` and `postgresql://` URLs are normalized automati
 If the database password contains reserved URI characters, URL-encode them before
 putting the URI in `.env` or Render's environment settings.
 
-Email/password sign-up and sign-in use Supabase Auth through the public anon key.
-Enable the Email provider in Supabase Authentication settings and allow the local
-callback http://127.0.0.1:8001/#/signin plus the deployed Render origin in the
-Auth URL configuration. SUPABASE_KEY must be the anon/public key; the API refuses
-to expose a service-role/secret key. User login does not yet grant guide, government,
-or admin authorization; those role policies and protected workflows remain pending.
+Google sign-in uses Supabase Auth OAuth with PKCE. Set `SUPABASE_URL` and
+`SUPABASE_KEY` (the anon/public key) in `backend/.env` and in Render. The backend
+auth config endpoint refuses to expose a service-role/secret key. In Supabase,
+enable Google under Authentication > Providers and add the project's Supabase
+callback URL (`https://<project-ref>.supabase.co/auth/v1/callback`) to the Google
+OAuth client's authorized redirect URIs. Add `http://127.0.0.1:8001` and your
+Render app origin as authorized JavaScript origins. Under Authentication > URL
+Configuration, allow `http://127.0.0.1:8001/**` and your Render origin. The OAuth
+redirect itself does not need the application database; profile persistence and
+role-based authorization are separate work still pending.
 
 ## Docker and Render
 From the repository root:
