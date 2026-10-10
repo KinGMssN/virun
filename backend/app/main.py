@@ -36,7 +36,18 @@ _RESOURCES = Path(__file__).resolve().parent.parent / "resources"
 if _RESOURCES.is_dir():
     app.mount("/resources", StaticFiles(directory=str(_RESOURCES)), name="resources")
 
-_FRONTEND = Path(__file__).resolve().parents[2] / "index.html"
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+_FRONTEND = next(
+    (
+        candidate
+        for candidate in (
+            _PROJECT_ROOT / "index.html",
+            _PROJECT_ROOT / "backend" / "index.html",
+        )
+        if candidate.is_file()
+    ),
+    _PROJECT_ROOT / "index.html",
+)
 
 
 @app.get("/", include_in_schema=False)

@@ -21,4 +21,4 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: TRANSPORT_REPOSITORY
-        value: json
+        value: supabase
