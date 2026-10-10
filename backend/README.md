@@ -126,6 +126,13 @@ To apply the schema to Supabase PostgreSQL, put its PostgreSQL connection URI in
 alembic upgrade head
 ```
 
+For projects applying SQL manually in the Supabase SQL Editor, apply the files in
+`supabase/migrations/` in numeric order. Migration
+`004_single_account_roles_and_guide_details.sql` adds the account type and guide
+experience/rating fields required by guide profile saves. Render's Docker startup
+runs the equivalent Alembic revision automatically when `DATABASE_URL` points to
+the same Supabase database.
+
 Migration `0002_generated_sightseeing_itineraries` extends `public.itineraries` to
 store Groq stay plans (`itinerary_type='sightseeing'`, `data_source='GROQ'`) and
 their validated day-by-day JSON in `generated_content`. A generated plan is saved
