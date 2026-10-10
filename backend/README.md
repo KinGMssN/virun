@@ -44,7 +44,7 @@ curl http://127.0.0.1:8000/api/transport/options
 | POST | `/api/plan` | Body = `TripRequest`. 200 + `itineraries`, or `{"error": {...}}` (404 `NO_FEASIBLE_ROUTE`, 422 `INVALID_REQUEST` / `UNKNOWN_LOCATION`) |
 | POST | `/api/chat` | Groq-backed assistant reply; accepts a message and up to 8 recent turns |
 | POST | `/api/parse-trip` | Groq extracts trip constraints and asks for missing details |
-| POST | `/api/generate-itinerary` | Groq creates validated sightseeing suggestions using destination, stay days/nights, budget ceiling, and preferences |
+| POST | `/api/generate-itinerary` | Groq creates validated sightseeing suggestions with named places from nearby OpenStreetMap results; returns 503 when verified place lookup finds none |
 | POST | `/api/plan/recover` | Body = `{"trip_request": TripRequest, "unavailable_leg_ids": [...]}`; replans while excluding disrupted legs |
 | GET | `/api/transport/options` | All records incl. cancelled/sold-out, with `data_source`. Optional filters: `origin_stop_id`, `destination_stop_id`, `mode` |
 | GET | `/api/rail/stations?q=Visakhapatnam` | Real railway station lookup through RailRadar; requires `RAILRADAR_API_KEY` |

@@ -33,7 +33,8 @@ def _attach_real_locations(itinerary: GeneratedItinerary, places: list[RealPlace
     for day in itinerary.days:
         for slot in slots:
             field = f"{slot}_location"
-            activity = f"{day.title} {getattr(day, slot)}".casefold()
+            activity_text = getattr(day, slot)
+            activity = f"{day.title} {activity_text}".casefold()
             keywords = set()
             for group, terms in _ACTIVITY_TAGS[field].items():
                 if any(cue in activity for cue in _ACTIVITY_CUES[group]):
@@ -44,16 +45,23 @@ def _attach_real_locations(itinerary: GeneratedItinerary, places: list[RealPlace
                 key=lambda item: sum(term in f"{item.category} {item.name}".casefold() for term in keywords),
             )
             setattr(day, field, place)
+            if place.name.casefold() not in activity_text.casefold():
+                setattr(day, slot, f"{activity_text.rstrip('. ')} at {place.name}.")
             unused = [candidate for candidate in unused if candidate != place]
 
 
 def generate_itinerary(req: ItineraryGenerationRequest, adapter, real_places=None) -> GeneratedItinerary:
+    places = [RealPlace.model_validate(place) for place in (real_places or [])]
+    if not places:
+        raise ModelError("PLACES_UNAVAILABLE")
+
     prompt = build_itinerary_prompt(
         req.destination,
         req.duration_days,
         req.preferences,
         req.duration_nights,
         req.budget_inr,
+        [{"name": place.name, "category": place.category} for place in places],
     )
     try:
         raw = adapter.generate_itinerary(prompt)
@@ -65,7 +73,7 @@ def generate_itinerary(req: ItineraryGenerationRequest, adapter, real_places=Non
             raise ValueError("model response duration does not match request")
         if itinerary.destination.strip().casefold() != req.destination.strip().casefold():
             raise ValueError("model response destination does not match request")
-        itinerary.places = [RealPlace.model_validate(place) for place in (real_places or [])]
+        itinerary.places = places
         _attach_real_locations(itinerary, itinerary.places)
         return itinerary
     except ModelError:

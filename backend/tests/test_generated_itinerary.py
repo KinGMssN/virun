@@ -10,10 +10,19 @@ from app.main import app
 
 client = TestClient(app, raise_server_exceptions=False)
 
+PLACE = {
+    "name": "Charminar",
+    "category": "Monument",
+    "latitude": 17.3616,
+    "longitude": 78.4747,
+    "source_url": "https://www.openstreetmap.org/node/123",
+    "map_url": "https://www.openstreetmap.org/?mlat=17.3616&mlon=78.4747",
+}
+
 
 @pytest.fixture(autouse=True)
 def avoid_external_places_service(monkeypatch):
-    monkeypatch.setattr(router_module, "find_nearby_places", lambda _destination: [])
+    monkeypatch.setattr(router_module, "find_nearby_places", lambda _destination: [PLACE])
 
 
 class FakeGenerator:
@@ -55,6 +64,7 @@ def test_generates_requested_number_of_days(monkeypatch):
     assert response.status_code == 200
     assert len(response.json()["days"]) == 3
     assert "beaches" in generator.prompt
+    assert "- Charminar (Monument)" in generator.prompt
 
 
 def test_persists_generated_plan_and_returns_database_id(monkeypatch):
@@ -88,16 +98,8 @@ def test_includes_only_places_returned_by_the_places_provider(monkeypatch):
     generator = FakeGenerator(
         {"destination": "Hyderabad", "duration_days": 1, "days": make_days(1)}
     )
-    place = {
-        "name": "Charminar",
-        "category": "Monument",
-        "latitude": 17.3616,
-        "longitude": 78.4747,
-        "source_url": "https://www.openstreetmap.org/node/123",
-        "map_url": "https://www.openstreetmap.org/?mlat=17.3616&mlon=78.4747",
-    }
     monkeypatch.setattr(router_module, "get_adapter", lambda: generator)
-    monkeypatch.setattr(router_module, "find_nearby_places", lambda _: [place])
+    monkeypatch.setattr(router_module, "find_nearby_places", lambda _: [PLACE])
     monkeypatch.setattr(router_module, "save_generated_itinerary", lambda **_: uuid4())
 
     response = client.post(
@@ -106,31 +108,30 @@ def test_includes_only_places_returned_by_the_places_provider(monkeypatch):
     )
 
     assert response.status_code == 200
-    assert response.json()["places"] == [place]
+    assert response.json()["places"] == [PLACE]
     day = response.json()["days"][0]
-    assert day["morning_location"] == place
-    assert day["afternoon_location"] == place
-    assert day["evening_location"] == place
-    assert "specific venues" in generator.prompt
+    assert day["morning_location"] == PLACE
+    assert day["afternoon_location"] == PLACE
+    assert day["evening_location"] == PLACE
+    assert all("Charminar" in day[slot] for slot in ("morning", "afternoon", "evening"))
+    assert "do not invent or substitute venue\nnames" in generator.prompt
 
 
-def test_plan_location_fields_are_empty_when_no_verified_places_exist(monkeypatch):
+def test_itinerary_fails_explicitly_when_no_verified_places_exist(monkeypatch):
     generator = FakeGenerator(
         {"destination": "Goa", "duration_days": 1, "days": make_days(1)}
     )
     monkeypatch.setattr(router_module, "get_adapter", lambda: generator)
-    monkeypatch.setattr(router_module, "save_generated_itinerary", lambda **_: uuid4())
+    monkeypatch.setattr(router_module, "find_nearby_places", lambda _: [])
 
     response = client.post(
         "/api/generate-itinerary",
         json={"destination": "Goa", "duration_days": 1},
     )
 
-    assert response.status_code == 200
-    day = response.json()["days"][0]
-    assert day["morning_location"] is None
-    assert day["afternoon_location"] is None
-    assert day["evening_location"] is None
+    assert response.status_code == 503
+    assert response.json()["detail"]["code"] == "PLACES_UNAVAILABLE"
+    assert "Verified nearby places" in response.json()["detail"]["message"]
 
 
 def test_keeps_generated_plan_visible_when_database_is_not_configured(monkeypatch):

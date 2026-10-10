@@ -76,12 +76,19 @@ def generate_trip_itinerary(req: ItineraryGenerationRequest):
         itinerary = generate_itinerary(req, adapter, real_places)
     except ModelError as exc:
         log.warning("itinerary generation error code=%s", exc.code)
-        status_code = 503 if exc.code == "NOT_CONFIGURED" else 502
+        status_code = 503 if exc.code in {"NOT_CONFIGURED", "PLACES_UNAVAILABLE"} else 502
+        message = {
+            "NOT_CONFIGURED": "AI itinerary generation is unavailable. Check the Groq configuration and retry.",
+            "PLACES_UNAVAILABLE": "Verified nearby places could not be found for this destination. Try a nearby city or retry.",
+        }.get(
+            exc.code,
+            "AI itinerary generation is unavailable. Check the Groq configuration and retry.",
+        )
         raise HTTPException(
             status_code=status_code,
             detail={
                 "code": exc.code,
-                "message": "AI itinerary generation is unavailable. Check the Groq configuration and retry.",
+                "message": message,
             },
         ) from exc
     try:
