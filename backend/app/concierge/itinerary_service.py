@@ -11,7 +11,13 @@ log = logging.getLogger("concierge")
 
 
 def generate_itinerary(req: ItineraryGenerationRequest, adapter) -> GeneratedItinerary:
-    prompt = build_itinerary_prompt(req.destination, req.duration_days, req.preferences)
+    prompt = build_itinerary_prompt(
+        req.destination,
+        req.duration_days,
+        req.preferences,
+        req.duration_nights,
+        req.budget_inr,
+    )
     try:
         raw = adapter.generate_itinerary(prompt)
         data = json.loads(raw)

@@ -56,17 +56,26 @@ def build_prompt(
     )
 
 
-def build_itinerary_prompt(destination: str, duration_days: int, preferences: str | None) -> str:
+def build_itinerary_prompt(
+    destination: str,
+    duration_days: int,
+    preferences: str | None,
+    duration_nights: int | None = None,
+    budget_inr: float | None = None,
+) -> str:
     return f"""Create a practical day-by-day sightseeing suggestion for a trip in India.
 Return ONLY one JSON object with keys "destination", "duration_days", and "days".
 The days array must contain exactly {duration_days} objects, numbered sequentially from 1.
 Each day object must contain "day", "title", "morning", "afternoon", and "evening".
-Use concise activity suggestions. Do not claim current opening hours, prices, availability,
-or reservations; do not invent factual details. Keep a sensible pace and do not repeat
+Use concise activity suggestions. Tailor the pace and suggestions to the supplied stay length
+and maximum trip budget. Do not provide price quotes or claim current opening hours, prices,
+availability, or reservations; do not invent factual details. Keep a sensible pace and do not repeat
 the same attraction unless the user asks. These are AI-generated suggestions, not verified
 travel facts or bookings.
 
 Destination: {destination}
 Trip duration: exactly {duration_days} days
+Nights at destination: {duration_nights if duration_nights is not None else "not specified"}
+Maximum total trip budget: INR {budget_inr if budget_inr is not None else "not specified"}
 Traveler interests and preferences: {preferences or "No specific preferences provided"}
 JSON:"""

@@ -44,7 +44,7 @@ curl http://127.0.0.1:8000/api/transport/options
 | POST | `/api/plan` | Body = `TripRequest`. 200 + `itineraries`, or `{"error": {...}}` (404 `NO_FEASIBLE_ROUTE`, 422 `INVALID_REQUEST` / `UNKNOWN_LOCATION`) |
 | POST | `/api/chat` | Groq-backed assistant reply; accepts a message and up to 8 recent turns |
 | POST | `/api/parse-trip` | Groq extracts trip constraints and asks for missing details |
-| POST | `/api/generate-itinerary` | Groq creates validated sightseeing suggestions for 1–15 days |
+| POST | `/api/generate-itinerary` | Groq creates validated sightseeing suggestions using destination, stay days/nights, budget ceiling, and preferences |
 | POST | `/api/plan/recover` | Body = `{"trip_request": TripRequest, "unavailable_leg_ids": [...]}`; replans while excluding disrupted legs |
 | GET | `/api/transport/options` | All records incl. cancelled/sold-out, with `data_source`. Optional filters: `origin_stop_id`, `destination_stop_id`, `mode` |
 | GET | `/api/rail/stations?q=Visakhapatnam` | Real railway station lookup through RailRadar; requires `RAILRADAR_API_KEY` |
@@ -157,6 +157,10 @@ unset or `false` to enable Groq. The blueprint sets `GROQ_MODEL` to
 you need a non-default timeout (default 60 seconds). The blueprint requests provider
 keys as secrets and does not store their values in source control. The backend CI workflow runs the test suite on Python
 3.11 and 3.12 and builds the Docker image.
+
+## Three-part travel flow
+
+The frontend guides a traveler through Going (RailRadar outbound trains), Staying (a Groq-generated day plan using required days, nights, and budget inputs), and Returning (RailRadar trains back to the origin). RailRadar does not provide fare quotes, seat inventory, or booking. Groq itinerary suggestions are not verified price quotes or reservations.
 
 ## Known limitations
 * The planner has no transport data by default. Supabase rows labeled DEMO, SAMPLE, SIMULATED, or MOCK are excluded from results. RailRadar train timetable search is available through `/api/rail`; fares, seats, and booking are unavailable.

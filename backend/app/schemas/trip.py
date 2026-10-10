@@ -86,6 +86,8 @@ class ParseTripResponse(BaseModel):
 class ItineraryGenerationRequest(BaseModel):
     destination: str = Field(min_length=1, max_length=120)
     duration_days: int = Field(ge=1, le=15)
+    duration_nights: Optional[int] = Field(default=None, ge=0, le=30)
+    budget_inr: Optional[float] = Field(default=None, gt=0, le=10000000)
     preferences: Optional[str] = Field(default=None, max_length=1000)
 
     @field_validator("destination")
