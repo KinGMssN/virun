@@ -52,8 +52,6 @@ def _attach_real_locations(itinerary: GeneratedItinerary, places: list[RealPlace
 
 def generate_itinerary(req: ItineraryGenerationRequest, adapter, real_places=None) -> GeneratedItinerary:
     places = [RealPlace.model_validate(place) for place in (real_places or [])]
-    if not places:
-        raise ModelError("PLACES_UNAVAILABLE")
 
     prompt = build_itinerary_prompt(
         req.destination,

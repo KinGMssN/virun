@@ -117,7 +117,7 @@ def test_includes_only_places_returned_by_the_places_provider(monkeypatch):
     assert "do not invent or substitute venue\nnames" in generator.prompt
 
 
-def test_itinerary_fails_explicitly_when_no_verified_places_exist(monkeypatch):
+def test_itinerary_still_generates_when_place_lookup_returns_no_results(monkeypatch):
     generator = FakeGenerator(
         {"destination": "Goa", "duration_days": 1, "days": make_days(1)}
     )
@@ -129,9 +129,16 @@ def test_itinerary_fails_explicitly_when_no_verified_places_exist(monkeypatch):
         json={"destination": "Goa", "duration_days": 1},
     )
 
-    assert response.status_code == 503
-    assert response.json()["detail"]["code"] == "PLACES_UNAVAILABLE"
-    assert "Verified nearby places" in response.json()["detail"]["message"]
+    assert response.status_code == 200
+    body = response.json()
+    assert body["destination"] == "Goa"
+    assert body["places"] == []
+    assert all(
+        day[field] is None
+        for day in body["days"]
+        for field in ("morning_location", "afternoon_location", "evening_location")
+    )
+    assert "do not invent venue names" in generator.prompt
 
 
 def test_keeps_generated_plan_visible_when_database_is_not_configured(monkeypatch):

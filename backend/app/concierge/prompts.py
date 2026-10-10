@@ -67,6 +67,14 @@ def build_itinerary_prompt(
     place_list = "\n".join(
         f"- {place['name']} ({place['category']})" for place in (real_places or [])
     )
+    location_instructions = (
+        "Each morning, afternoon, and evening activity must name one place from the verified list below. "
+        "Use each place name exactly as written, do not invent or substitute venue names, and include the "
+        "chosen place in the activity text itself."
+        if place_list
+        else "No verified nearby place records are available right now. Still create the requested itinerary, "
+        "but do not invent venue names or claim a specific location; describe activities generally."
+    )
     return f"""Create a practical day-by-day sightseeing suggestion for a trip in India.
 Return ONLY one JSON object with keys "destination", "duration_days", and "days".
 The days array must contain exactly {duration_days} objects, numbered sequentially from 1.
@@ -75,9 +83,7 @@ Use concise activity suggestions. Tailor the pace and suggestions to the supplie
 and maximum trip budget. Do not provide price quotes or claim current opening hours, prices,
 availability, or reservations; do not invent factual details. Keep a sensible pace and do not repeat
 the same attraction unless the user asks. These are AI-generated suggestions, not verified
-travel facts or bookings. Each morning, afternoon, and evening activity must name one place from
-the verified list below. Use each place name exactly as written, do not invent or substitute venue
-names, and include the chosen place in the activity text itself.
+travel facts or bookings. {location_instructions}
 
 Destination: {destination}
 Trip duration: exactly {duration_days} days
