@@ -12,7 +12,7 @@ Updated 2026-10-10. A checked item is limited to what exists and has been verifi
 - [x] Bundled transport data is identified as simulated; bus fares and availability are not represented as live.
 - [x] Render blueprint, Docker configuration, CI workflow, Supabase schema/seed/repository option, and integration setup docs are present.
 - [x] SQLAlchemy models and an Alembic bootstrap migration define the relational app schema, including transport tables.
-- [x] Groq-generated stay plans are persisted as `sightseeing` records in `public.itineraries`, with the generated day plan stored as JSONB and no invented transport fare or duration; the Itinerary page lists plans saved in this browser.
+- [x] Groq-generated stay plans are persisted as `sightseeing` records in `public.itineraries`, with the generated day plan stored as JSONB and no invented transport fare or duration; generated plans remain visible in the Itinerary page and are clearly labeled if the database save fails.
 - [x] Card entry has been removed from the payment preview; identity and government screens now clearly state that no real provider/access control is connected.
 - [x] Registration and sign-in screens no longer ask for account credentials; the privacy screen explains the backend and Groq data flow.
 - [x] API frontend serving and Docker packaging use the single frontend entry point under `frontend/index.html`.

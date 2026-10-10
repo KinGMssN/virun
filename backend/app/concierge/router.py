@@ -72,14 +72,6 @@ def generate_trip_itinerary(req: ItineraryGenerationRequest):
     try:
         adapter = get_adapter()
         itinerary = generate_itinerary(req, adapter)
-        itinerary_id = save_generated_itinerary(
-            plan=itinerary,
-            duration_nights=req.duration_nights,
-            budget_inr=req.budget_inr,
-        )
-        itinerary.itinerary_id = itinerary_id
-        itinerary.saved_to_database = True
-        return itinerary
     except ModelError as exc:
         log.warning("itinerary generation error code=%s", exc.code)
         status_code = 503 if exc.code == "NOT_CONFIGURED" else 502
@@ -90,14 +82,19 @@ def generate_trip_itinerary(req: ItineraryGenerationRequest):
                 "message": "AI itinerary generation is unavailable. Check the Groq configuration and retry.",
             },
         ) from exc
-    except DatabaseNotConfigured as exc:
-        raise HTTPException(
-            status_code=503,
-            detail={"code": "DATABASE_NOT_CONFIGURED", "message": str(exc)},
-        ) from exc
+    try:
+        itinerary.itinerary_id = save_generated_itinerary(
+            plan=itinerary,
+            duration_nights=req.duration_nights,
+            budget_inr=req.budget_inr,
+        )
+        itinerary.saved_to_database = True
+        return itinerary
+    except DatabaseNotConfigured:
+        log.warning("itinerary generated but database persistence is not configured")
+        itinerary.save_error = "Database is not configured. Add DATABASE_URL and apply the itinerary migration."
+        return itinerary
     except Exception as exc:
         log.exception("generated itinerary could not be saved")
-        raise HTTPException(
-            status_code=503,
-            detail={"code": "ITINERARY_SAVE_FAILED", "message": "The plan was generated but could not be saved. Check DATABASE_URL and apply the database migration, then retry."},
-        ) from exc
+        itinerary.save_error = "Database save failed. Check DATABASE_URL, database connectivity, and that the itinerary migration is applied."
+        return itinerary

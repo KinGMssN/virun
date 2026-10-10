@@ -111,6 +111,7 @@ class GeneratedItinerary(BaseModel):
     days: list[DayPlan]
     itinerary_id: UUID | None = None
     saved_to_database: bool = False
+    save_error: str | None = None
 
     @field_validator("days")
     @classmethod

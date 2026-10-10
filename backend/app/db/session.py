@@ -39,7 +39,7 @@ def save_generated_itinerary(*, plan, duration_nights: int | None, budget_inr: f
             trip_request_id=None,
             label=f"{plan.destination} {plan.duration_days}-day stay plan"[:80],
             itinerary_type="sightseeing",
-            generated_content=plan.model_dump(mode="json", exclude={"itinerary_id", "saved_to_database"}),
+            generated_content=plan.model_dump(mode="json", exclude={"itinerary_id", "saved_to_database", "save_error"}),
             duration_days=plan.duration_days,
             duration_nights=duration_nights,
             budget_inr=budget_inr,

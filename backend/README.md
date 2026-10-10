@@ -123,8 +123,10 @@ store Groq stay plans (`itinerary_type='sightseeing'`, `data_source='GROQ'`) and
 their validated day-by-day JSON in `generated_content`. A generated plan is saved
 only after the database commit succeeds. Ensure this migration is applied before
 using `/api/generate-itinerary`; the Render Docker startup runs Alembic on deploy.
-The current Itinerary page keeps its display cache in that browser's local storage;
-cross-device, account-scoped itinerary retrieval still needs authenticated CRUD.
+If persistence is unavailable, the API still returns the generated plan with
+`saved_to_database=false` and a safe `save_error`; the frontend displays it and keeps
+a browser-local copy. Cross-device, account-scoped itinerary retrieval still needs
+authenticated CRUD.
 
 For local development only, the demo seed script can load simulated records. Do not use it for live data:
 
