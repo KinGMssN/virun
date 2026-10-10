@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -11,7 +12,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Header, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, select
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.db.models import GuideLanguage, GuideProfile, GuideProfileLanguage, Profile
@@ -19,6 +20,32 @@ from app.db.session import DatabaseNotConfigured, _session_factory
 
 router = APIRouter(prefix="/api/guides", tags=["guides"])
 profile_router = APIRouter(prefix="/api/profile", tags=["profiles"])
+logger = logging.getLogger(__name__)
+
+
+def _database_failure(operation: str, exc: SQLAlchemyError) -> HTTPException:
+    original = getattr(exc, "orig", None)
+    sqlstate = getattr(original, "sqlstate", None) or getattr(original, "pgcode", None)
+    logger.error(
+        "Database operation %s failed (exception=%s, sqlstate=%s)",
+        operation,
+        type(exc).__name__,
+        sqlstate or "unavailable",
+    )
+    if sqlstate in {"42P01", "42703", "42704"}:
+        return HTTPException(
+            status_code=503,
+            detail="The database schema is out of date. Redeploy so Alembic can apply the latest migration.",
+        )
+    if isinstance(exc, OperationalError):
+        return HTTPException(
+            status_code=503,
+            detail="The app could not connect to PostgreSQL. Check Render DATABASE_URL, SSL mode, and Supabase pooler availability.",
+        )
+    return HTTPException(
+        status_code=503,
+        detail="The database rejected this profile save. Check the Render logs for the database error code.",
+    )
 
 
 class GuideProfileInput(BaseModel):
@@ -93,7 +120,7 @@ def save_account_role(payload: AccountRoleInput, user: dict = Depends(_current_u
     except IntegrityError as exc:
         raise HTTPException(status_code=409, detail="This profile conflicts with an existing account record.") from exc
     except SQLAlchemyError as exc:
-        raise HTTPException(status_code=503, detail="Could not save the account type. Check the database connection and apply migrations.") from exc
+        raise _database_failure("save_account_role", exc) from exc
 
 
 @profile_router.get("/role")
@@ -109,7 +136,7 @@ def get_account_role(user: dict = Depends(_current_user)):
     except DatabaseNotConfigured as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except SQLAlchemyError as exc:
-        raise HTTPException(status_code=503, detail="Account database is unavailable.") from exc
+        raise _database_failure("get_account_role", exc) from exc
 
 
 def _payload(session: Session, account_id: UUID) -> dict:
@@ -143,7 +170,7 @@ def get_guide_profile(user: dict = Depends(_current_user)):
     except DatabaseNotConfigured as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except SQLAlchemyError as exc:
-        raise HTTPException(status_code=503, detail="Guide profile database is unavailable.") from exc
+        raise _database_failure("get_guide_profile", exc) from exc
 
 
 @router.put("/profile")
@@ -208,4 +235,4 @@ def save_guide_profile(payload: GuideProfileInput, user: dict = Depends(_current
     except IntegrityError as exc:
         raise HTTPException(status_code=409, detail="That phone number is already in use, or guide details conflict with an existing record.") from exc
     except SQLAlchemyError as exc:
-        raise HTTPException(status_code=503, detail="Could not save guide details. Check the database connection and apply migrations.") from exc
+        raise _database_failure("save_guide_profile", exc) from exc
