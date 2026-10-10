@@ -19,10 +19,10 @@ _cache_lock = threading.Lock()
 _request_lock = threading.Lock()
 _last_request_at = 0.0
 _CACHE_SECONDS = 6 * 60 * 60
-_SEARCH_RADIUS_METERS = 20_000
+_SEARCH_RADIUS_METERS = 50_000
 
 
-def _request_json(url: str, *, data: bytes | None = None) -> dict | list:
+def _request_json(url: str, *, data: bytes | None = None, timeout: int = 15) -> dict | list:
     global _last_request_at
     # Nominatim requires no more than one request per second per application.
     with _request_lock:
@@ -34,7 +34,7 @@ def _request_json(url: str, *, data: bytes | None = None) -> dict | list:
             headers["Content-Type"] = "application/x-www-form-urlencoded; charset=utf-8"
         request = Request(url, data=data, headers=headers)
         try:
-            with urlopen(request, timeout=15) as response:
+            with urlopen(request, timeout=timeout) as response:
                 result = json.loads(response.read().decode("utf-8"))
         finally:
             _last_request_at = time.monotonic()
@@ -68,17 +68,17 @@ def find_nearby_places(destination: str, limit: int = 20) -> list[dict]:
             raise ValueError("Invalid coordinates from geocoder")
 
         overpass_url = os.getenv("OSM_OVERPASS_URL", "https://overpass-api.de/api/interpreter").strip()
-        query_body = f"""[out:json][timeout:25];
+        query_body = f"""[out:json][timeout:45];
 (
-  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["tourism"~"^(attraction|museum|viewpoint|zoo|theme_park|gallery|aquarium)$"];
-  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["historic"~"^(monument|memorial|fort|castle|archaeological_site|ruins)$"];
-  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["leisure"="park"];
-  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["amenity"~"^(restaurant|cafe|fast_food|marketplace)$"];
-  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["shop"="marketplace"];
+  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["tourism"~"^(attraction|museum|viewpoint|zoo|theme_park|gallery|aquarium)$"]["name"];
+  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["historic"~"^(monument|memorial|fort|castle|archaeological_site|ruins)$"]["name"];
+  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["leisure"="park"]["name"];
+  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["amenity"~"^(restaurant|cafe|fast_food|marketplace)$"]["name"];
+  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["shop"="marketplace"]["name"];
 );
-out center tags 60;"""
+out center tags 200;"""
         data = urlencode({"data": query_body}).encode("utf-8")
-        response = _request_json(overpass_url, data=data)
+        response = _request_json(overpass_url, data=data, timeout=50)
         elements = response.get("elements", []) if isinstance(response, dict) else []
         places: list[dict] = []
         seen: set[str] = set()

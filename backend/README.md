@@ -130,10 +130,11 @@ a browser-local copy. Cross-device, account-scoped itinerary retrieval still nee
 authenticated CRUD.
 
 Stay plans query OpenStreetMap's Nominatim geocoder and Overpass place data for
-named places within 7 km of the selected city/area. Responses are cached in memory
-for six hours, requests are throttled, and the frontend links to OpenStreetMap
-attribution. The public services are best-effort and can return no places; the AI
-prompt then avoids naming specific venues. Set `OSM_NOMINATIM_URL` and
+named places within 50 km of the selected city/area. Overpass lookups allow up to
+50 seconds for the public service to respond and exclude unnamed map objects from
+the results. Responses are cached in memory for six hours, requests are
+throttled, and the frontend links to OpenStreetMap attribution. The public
+services are best-effort and can still return no places. Set `OSM_NOMINATIM_URL` and
 `OSM_OVERPASS_URL` to alternate compatible endpoints if requested by those services.
 
 Authentication screens use Supabase Auth email/password and Google OAuth. A safe

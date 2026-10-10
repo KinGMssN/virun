@@ -1,4 +1,4 @@
-from urllib.parse import unquote
+from urllib.parse import unquote_plus
 
 from app.concierge import places_service
 
@@ -8,8 +8,8 @@ def test_finds_named_osm_places_and_caches_results(monkeypatch):
     monkeypatch.setattr(places_service.time, "sleep", lambda _seconds: None)
     calls = []
 
-    def fake_request(url, *, data=None):
-        calls.append((url, data))
+    def fake_request(url, *, data=None, timeout=15):
+        calls.append((url, data, timeout))
         if data is None:
             return [{"lat": "17.3850", "lon": "78.4867"}]
         return {
@@ -36,9 +36,13 @@ def test_finds_named_osm_places_and_caches_results(monkeypatch):
     assert found[0]["category"] == "Monument"
     assert found[0]["source_url"].endswith("/node/123")
     assert "openstreetmap.org/?mlat=" in found[0]["map_url"]
-    query = unquote(calls[1][1].decode("utf-8"))
-    assert query.count("around:20000,") == 5
-    assert "[timeout:25]" in query
+    query = unquote_plus(calls[1][1].decode("utf-8"))
+    assert query.count("around:50000,") == 5
+    assert query.count('["name"]') == 5
+    assert "[timeout:45]" in query
+    assert "out center tags 200;" in query
+    assert calls[0][2] == 15
+    assert calls[1][2] == 50
 
 
 def test_no_geocoder_result_returns_empty_without_overpass(monkeypatch):
