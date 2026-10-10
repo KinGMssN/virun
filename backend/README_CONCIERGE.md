@@ -7,7 +7,7 @@ It never invents fares, schedules, coordinates, availability or bookings.
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env        # then fill in XAI_API_KEY and GROK_MODEL
+cp .env.example .env        # then fill in GROQ_API_KEY
 uvicorn app.main:app --reload
 pytest
 ```
@@ -15,8 +15,8 @@ pytest
 ## Environment variables (for Member 4 / Render)
 | Variable | Purpose |
 |---|---|
-| XAI_API_KEY | xAI API key (server only, never commit) |
-| GROK_MODEL | Grok model name from the xAI docs |
+| GROQ_API_KEY | Groq API key (server only, never commit) |
+| GROQ_MODEL | Groq model ID; defaults to `openai/gpt-oss-20b` |
 | MODEL_TIMEOUT_SECONDS | Model timeout, default 15 |
 | USE_MOCK_PARSER | true = use the rule-based mock, no API calls |
 | ENABLE_MOCK_FALLBACK | true = use mock when model times out / quota / errors |

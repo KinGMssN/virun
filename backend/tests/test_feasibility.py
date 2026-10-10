@@ -111,6 +111,15 @@ def test_required_ac_rejects_explicitly_non_ac_legs_only():
     assert alg.find_violations((non_ac,), req(ac_preference="preferred")) == []
 
 
+def test_non_ac_preference_rejects_explicitly_ac_legs_only():
+    ac = make_option("L1", "A", "B", "2026-10-11T08:00", "2026-10-11T10:00", ac=True)
+    non_ac = make_option("L2", "A", "B", "2026-10-11T08:00", "2026-10-11T10:00", ac=False)
+    unknown = make_option("L3", "A", "B", "2026-10-11T08:00", "2026-10-11T10:00", ac=None)
+    assert alg.find_violations((ac,), req(ac_preference="non_ac")) == [alg.AC_PREFERENCE_NOT_MET]
+    assert alg.find_violations((non_ac,), req(ac_preference="non_ac")) == []
+    assert alg.find_violations((unknown,), req(ac_preference="non_ac")) == []
+
+
 def test_multiple_violations_are_all_reported_in_fixed_order():
     leg = make_option("L1", "A", "B", "2026-10-11T08:00", "2026-10-13T10:00", fare=5000, status="cancelled")
     assert alg.find_violations((leg,), req()) == [alg.UNAVAILABLE_LEG, alg.DEADLINE_EXCEEDED, alg.OVER_BUDGET]

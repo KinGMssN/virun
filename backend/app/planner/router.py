@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.planner.service import plan_trip
 from app.repositories.transport_repository import TransportRepository, get_default_repository
@@ -39,16 +39,36 @@ class TransportOptionsResponse(BaseModel):
     options: list[TransportOption]
 
 
-@router.post("/plan", response_model=PlanResponse, response_model_exclude={"error"})
-def plan(request: TripRequest, repo: TransportRepository = Depends(get_repository)):
-    """Plan a trip. Success: 200 + itineraries. Failure: {"error": {...}} with a 4xx status."""
-    result = plan_trip(request, repository=repo)
+class RecoverRequest(BaseModel):
+    trip_request: TripRequest
+    unavailable_leg_ids: list[str] = Field(
+        default_factory=list,
+        description="Option IDs to treat as cancelled/sold-out for replanning.",
+    )
+
+
+def _plan_result_to_response(result: PlanResponse):
+    """Convert a PlanResponse into an HTTP response, mapping errors to 4xx."""
     if result.error is not None:
         return JSONResponse(
             status_code=ERROR_STATUS.get(result.error.code, 400),
             content={"error": result.error.model_dump(mode="json", exclude_none=True)},
         )
     return result
+
+
+@router.post("/plan", response_model=PlanResponse, response_model_exclude={"error"})
+def plan(request: TripRequest, repo: TransportRepository = Depends(get_repository)):
+    """Plan a trip. Success: 200 + itineraries. Failure: {"error": {...}} with a 4xx status."""
+    return _plan_result_to_response(plan_trip(request, repository=repo))
+
+
+@router.post("/plan/recover", response_model=PlanResponse, response_model_exclude={"error"})
+def recover(body: RecoverRequest, repo: TransportRepository = Depends(get_repository)):
+    """Replan after disruption. Accepts the original trip request plus leg IDs to exclude."""
+    return _plan_result_to_response(
+        plan_trip(body.trip_request, unavailable_leg_ids=body.unavailable_leg_ids, repository=repo)
+    )
 
 
 @router.get("/transport/options", response_model=TransportOptionsResponse)

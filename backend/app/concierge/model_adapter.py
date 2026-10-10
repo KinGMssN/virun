@@ -13,15 +13,15 @@ class ModelError(Exception):
         self.code = code
 
 
-class GrokAdapter:
+class GroqAdapter:
     def __init__(self):
-        key = os.getenv("XAI_API_KEY")
-        self.model = os.getenv("GROK_MODEL")
+        key = os.getenv("GROQ_API_KEY")
+        self.model = os.getenv("GROQ_MODEL")
         if not key or not self.model:
             raise ModelError("NOT_CONFIGURED")
         self.client = OpenAI(
             api_key=key,
-            base_url="https://api.x.ai/v1",
+            base_url="https://api.groq.com/openai/v1",
             timeout=float(os.getenv("MODEL_TIMEOUT_SECONDS", "15")),
             max_retries=0,
         )
@@ -56,13 +56,19 @@ class MockAdapter:
             "passengers": None, "budget_inr": None, "bus_preference": None,
             "ac_preference": None, "has_luggage": None, "priority": None,
         }
-        m = re.search(r"from (.+?) to (.+?)(?:,|\.| with | and | before | by |$)", msg, re.I)
+        m = re.search(
+            r"from (.+?) to (.+?)(?:,|\.| with | and | before | by | arrive | tomorrow\b| today\b| tonight\b|$)",
+            msg,
+            re.I,
+        )
         if m:
             out["origin"], out["destination"] = m.group(1).strip(), m.group(2).strip()
         for word in ("day after tomorrow", "tomorrow", "today", "tonight"):
             if word in low:
                 out["relative_date_text"] = word
                 break
+        if re.search(r"\b(?:overnight|next day|following day)\b", low):
+            out["arrival_next_day"] = True
         t = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", low)
         if t:
             h, mi, ap = int(t[1]), int(t[2] or 0), t[3]
@@ -95,4 +101,4 @@ class MockAdapter:
 def get_adapter():
     if os.getenv("USE_MOCK_PARSER", "false").lower() == "true":
         return MockAdapter()
-    return GrokAdapter()
+    return GroqAdapter()

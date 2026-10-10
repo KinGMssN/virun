@@ -146,6 +146,7 @@ def test_unknown_location_and_same_place(request_dict):
 
 @pytest.mark.parametrize("patch,field", [
     ({"passengers": 0}, "passengers"),
+    ({"passengers": 11}, "passengers"),
     ({"budget_inr": -5}, "budget_inr"),
     ({"arrival_deadline": "2026-10-12T09:00:00"}, "arrival_deadline"),   # no UTC offset
     ({"arrival_deadline": "2026-10-10T09:00:00+05:30"}, "request"),      # before departure date
@@ -178,6 +179,14 @@ def test_excluding_everything_gives_structured_error(request_dict):
 def test_plan_trip_accepts_model_and_positional_arguments(request_dict):
     model = TripRequest.model_validate(request_dict)
     assert plan_trip(model, ["BUS-DEMO-002"]).model_dump() == plan_trip(request_dict, ["BUS-DEMO-002"]).model_dump()
+
+
+def test_planner_request_accepts_concierge_passenger_limit_and_non_ac(request_dict):
+    model = TripRequest.model_validate(
+        {**request_dict, "passengers": 10, "ac_preference": "non_ac"}
+    )
+    assert model.passengers == 10
+    assert model.ac_preference == "non_ac"
 
 
 # ---------------------------------------------------------------- API
@@ -218,6 +227,28 @@ def test_api_transport_options_filters():
     assert body["count"] == 2 and all(o["mode"] == "metro" for o in body["options"])
     body = client.get("/api/transport/options", params={"origin_stop_id": "VIZAG", "destination_stop_id": "HYD-HITEC"}).json()
     assert all(o["origin_stop_id"] == "VIZAG" and o["destination_stop_id"] == "HYD-HITEC" for o in body["options"])
+
+
+def test_recovery_api_replans_without_unavailable_legs(request_dict):
+    response = client.post(
+        "/api/plan/recover",
+        json={"trip_request": request_dict, "unavailable_leg_ids": ["BUS-DEMO-002"]},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["unavailable_leg_ids"] == ["BUS-DEMO-002"]
+    assert all("BUS-DEMO-002" not in item["route_key"] for item in body["itineraries"])
+
+
+def test_frontend_and_resources_are_served():
+    page = client.get("/")
+    assert page.status_code == 200
+    assert "text/html" in page.headers["content-type"]
+    assert "<title>Virun</title>" in page.text
+
+    image = client.get("/resources/images/chatbot/virun-happy.png")
+    assert image.status_code == 200
+    assert image.headers["content-type"] == "image/png"
 
 
 # ---------------------------------------------------------------- dataset integrity

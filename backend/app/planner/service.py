@@ -45,6 +45,7 @@ def _no_route_message(reason: str, request: TripRequest, origin: str, destinatio
         alg.INSUFFICIENT_TRANSFER_TIME: "Every route has a transfer that is too short.",
         alg.DEPARTS_BEFORE_REQUEST_DATE: "No route departs on or after the requested departure date.",
         alg.AC_REQUIRED_NOT_MET: "No route meets the required AC preference.",
+        alg.AC_PREFERENCE_NOT_MET: "No route meets the requested non-AC preference.",
         alg.DISCONNECTED_LEG: "No route has connected legs.",
         alg.INVALID_TIMESTAMPS: "Transport records have invalid timestamps.",
     }

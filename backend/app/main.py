@@ -1,16 +1,26 @@
-<<<<<<< HEAD
-"""FastAPI entrypoint.   Run from backend/:   uvicorn app.main:app --reload"""
+"""FastAPI entrypoint.
+
+Run from backend/:
+    uvicorn app.main:app --reload
+"""
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
+from app.concierge.router import router as concierge_router
 from app.planner.router import router as planner_router
+from app.railradar.router import router as railradar_router
 from app.schemas.itinerary import ERR_INVALID_REQUEST
+
+load_dotenv()
 
 app = FastAPI(
     title="TBS RoamAgent - Deterministic Route Planner",
@@ -21,6 +31,19 @@ app = FastAPI(
 
 origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if o.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
+
+_RESOURCES = Path(__file__).resolve().parent.parent / "resources"
+if _RESOURCES.is_dir():
+    app.mount("/resources", StaticFiles(directory=str(_RESOURCES)), name="resources")
+
+_FRONTEND = Path(__file__).resolve().parents[2] / "Index (2).html"
+
+
+@app.get("/", include_in_schema=False)
+def frontend():
+    if not _FRONTEND.is_file():
+        return JSONResponse(status_code=404, content={"detail": "Frontend file not found."})
+    return FileResponse(_FRONTEND, media_type="text/html")
 
 
 @app.exception_handler(RequestValidationError)
@@ -33,43 +56,27 @@ async def validation_error_handler(_: Request, exc: RequestValidationError):
         status_code=422,
         content={"error": {"code": ERR_INVALID_REQUEST, "message": "The trip request is invalid.", "details": details}},
     )
-=======
-import os
 
-from dotenv import load_dotenv
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
-load_dotenv()
-
-from app.concierge.router import router  # noqa: E402
-
-app = FastAPI(title="TBS RoamAgent")
-
-origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["*"], allow_headers=["*"])
-
-app.include_router(router)
->>>>>>> 866f4aee9638c06f229b91e8870d10997fdb4d8f
+@app.exception_handler(Exception)
+async def safe_error(_: Request, __: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "status": "error",
+            "error_code": "INTERNAL_ERROR",
+            "fallback": "manual_entry",
+            "missing_fields": [],
+            "clarification_questions": [],
+        },
+    )
 
 
 @app.get("/health")
 def health():
-<<<<<<< HEAD
     return {"status": "ok"}
 
 
+app.include_router(concierge_router)
 app.include_router(planner_router)
-=======
-    return {"ok": True}
-
-
-@app.exception_handler(Exception)
-async def safe_error(request: Request, exc: Exception):
-    return JSONResponse(
-        status_code=500,
-        content={"status": "error", "error_code": "INTERNAL_ERROR", "fallback": "manual_entry",
-                 "missing_fields": [], "clarification_questions": []},
-    )
->>>>>>> 866f4aee9638c06f229b91e8870d10997fdb4d8f
+app.include_router(railradar_router)

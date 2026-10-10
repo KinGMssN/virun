@@ -139,6 +139,27 @@ def test_quota_falls_back_to_mock(monkeypatch):
     assert r["trip_request"]["origin"] == "Vizag"
 
 
+def test_mock_parser_does_not_include_relative_date_in_destination(monkeypatch):
+    body = {
+        **BASE,
+        "message": "From Visakhapatnam to Hyderabad tomorrow, arrive before 9 AM",
+    }
+    response = post(monkeypatch, MockAdapter(), body)
+    assert response["status"] == "ready"
+    assert response["trip_request"]["destination"] == "Hyderabad"
+    assert response["trip_request"]["departure_date"] == "2026-10-11"
+
+
+def test_mock_parser_recognizes_next_day_arrival(monkeypatch):
+    body = {
+        **BASE,
+        "message": "From Visakhapatnam to Hyderabad tomorrow, arrive next day before 9 AM",
+    }
+    response = post(monkeypatch, MockAdapter(), body)
+    assert response["status"] == "ready"
+    assert response["trip_request"]["arrival_deadline"] == "2026-10-12T09:00:00+05:30"
+
+
 def test_unexpected_exception_is_safe(monkeypatch):
     class Boom:
         def extract(self, p):
@@ -156,16 +177,16 @@ def test_response_has_no_fare_or_schedule_keys(monkeypatch):
 
 
 def test_api_key_never_in_response(monkeypatch):
-    monkeypatch.setenv("XAI_API_KEY", "sk-test-SECRET")
+    monkeypatch.setenv("GROQ_API_KEY", "sk-test-SECRET")
     r = post(monkeypatch, FakeAdapter(ModelError("MODEL_ERROR")))
     assert "SECRET" not in json.dumps(r)
 
 
 def test_not_configured_when_no_key(monkeypatch):
-    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
     monkeypatch.delenv("USE_MOCK_PARSER", raising=False)
     monkeypatch.undo()
-    monkeypatch.delenv("XAI_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
     monkeypatch.setenv("USE_MOCK_PARSER", "false")
     monkeypatch.setenv("ENABLE_MOCK_FALLBACK", "false")
     r = client.post("/api/parse-trip", json=BASE).json()
@@ -181,3 +202,4 @@ def test_telugu_message_passes_through_adapter(monkeypatch):
     body = {**BASE, "message": "రేపు ఉదయం 9 లోపు విశాఖపట్నం నుండి హైదరాబాద్"}
     r = post(monkeypatch, FakeAdapter({**FULL, "origin": "Visakhapatnam", "destination": "Hyderabad"}), body)
     assert r["status"] == "ready"
+

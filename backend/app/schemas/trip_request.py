@@ -32,12 +32,12 @@ class TripRequest(BaseModel):
     departure_date: date
     arrival_deadline: datetime
     timezone: str = "Asia/Kolkata"
-    passengers: int = Field(default=1, ge=1, le=6)
+    passengers: int = Field(default=1, ge=1, le=10)
     budget_inr: Optional[int] = Field(
         default=None, ge=0, description="HARD limit on the TOTAL fare for all passengers"
     )
     bus_preference: Literal["sleeper", "seater", "any"] = "any"
-    ac_preference: Literal["required", "preferred", "none"] = "none"
+    ac_preference: Literal["required", "preferred", "non_ac", "none"] = "none"
     has_luggage: bool = False
     priority: Priority = "balanced"
 

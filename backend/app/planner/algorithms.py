@@ -58,6 +58,7 @@ DEPARTS_BEFORE_REQUEST_DATE = "DEPARTS_BEFORE_REQUEST_DATE"
 CHRONOLOGY_VIOLATION = "CHRONOLOGY_VIOLATION"
 INSUFFICIENT_TRANSFER_TIME = "INSUFFICIENT_TRANSFER_TIME"
 AC_REQUIRED_NOT_MET = "AC_REQUIRED_NOT_MET"
+AC_PREFERENCE_NOT_MET = "AC_PREFERENCE_NOT_MET"
 DEADLINE_EXCEEDED = "DEADLINE_EXCEEDED"
 OVER_BUDGET = "OVER_BUDGET"
 NO_CONNECTION = "NO_CONNECTION"  # not a per-candidate violation: no candidate exists at all
@@ -71,6 +72,7 @@ VIOLATION_ORDER = [
     INSUFFICIENT_TRANSFER_TIME,
     DEPARTS_BEFORE_REQUEST_DATE,
     AC_REQUIRED_NOT_MET,
+    AC_PREFERENCE_NOT_MET,
     DEADLINE_EXCEEDED,
     OVER_BUDGET,
 ]
@@ -182,6 +184,8 @@ def find_violations(
             found.add(UNAVAILABLE_LEG)
         if request.ac_preference == "required" and leg.ac is False:
             found.add(AC_REQUIRED_NOT_MET)
+        if request.ac_preference == "non_ac" and leg.ac is True:
+            found.add(AC_PREFERENCE_NOT_MET)
 
     needed = required_transfer_minutes(request.has_luggage, config)
     for prev, nxt in zip(candidate, candidate[1:]):
