@@ -5,12 +5,12 @@ from pydantic import ValidationError
 
 from app.concierge.model_adapter import ModelError
 from app.concierge.prompts import build_itinerary_prompt
-from app.schemas.trip import GeneratedItinerary, ItineraryGenerationRequest
+from app.schemas.trip import GeneratedItinerary, ItineraryGenerationRequest, RealPlace
 
 log = logging.getLogger("concierge")
 
 
-def generate_itinerary(req: ItineraryGenerationRequest, adapter) -> GeneratedItinerary:
+def generate_itinerary(req: ItineraryGenerationRequest, adapter, real_places=None) -> GeneratedItinerary:
     prompt = build_itinerary_prompt(
         req.destination,
         req.duration_days,
@@ -28,6 +28,7 @@ def generate_itinerary(req: ItineraryGenerationRequest, adapter) -> GeneratedIti
             raise ValueError("model response duration does not match request")
         if itinerary.destination.strip().casefold() != req.destination.strip().casefold():
             raise ValueError("model response destination does not match request")
+        itinerary.places = [RealPlace.model_validate(place) for place in (real_places or [])]
         return itinerary
     except ModelError:
         raise

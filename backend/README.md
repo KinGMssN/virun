@@ -128,6 +128,20 @@ If persistence is unavailable, the API still returns the generated plan with
 a browser-local copy. Cross-device, account-scoped itinerary retrieval still needs
 authenticated CRUD.
 
+Stay plans query OpenStreetMap's Nominatim geocoder and Overpass place data for
+named places within 7 km of the selected city/area. Responses are cached in memory
+for six hours, requests are throttled, and the frontend links to OpenStreetMap
+attribution. The public services are best-effort and can return no places; the AI
+prompt then avoids naming specific venues. Set `OSM_NOMINATIM_URL` and
+`OSM_OVERPASS_URL` to alternate compatible endpoints if requested by those services.
+
+Authentication screens use Supabase Auth email/password and Google OAuth. A safe
+internal return route can be requested as `#/signin?returnTo=itinerary`; external
+redirect URLs are rejected. OAuth callbacks default to the tourist dashboard.
+Cookie choices are saved in local storage; no analytics or advertising tracker is
+currently installed. The privacy and cookie pages describe the current provider
+flows and browser storage.
+
 For local development only, the demo seed script can load simulated records. Do not use it for live data:
 
 ```bash

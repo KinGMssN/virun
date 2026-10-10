@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.concierge.model_adapter import MockAdapter, ModelError, get_adapter
 from app.concierge.itinerary_service import generate_itinerary
+from app.concierge.places_service import find_nearby_places
 from app.concierge.service import run_parse
 from app.db.session import DatabaseNotConfigured, save_generated_itinerary
 from app.schemas.chat import ChatRequest, ChatResponse
@@ -71,7 +72,8 @@ def parse_trip(req: ParseTripRequest):
 def generate_trip_itinerary(req: ItineraryGenerationRequest):
     try:
         adapter = get_adapter()
-        itinerary = generate_itinerary(req, adapter)
+        real_places = find_nearby_places(req.destination)
+        itinerary = generate_itinerary(req, adapter, real_places)
     except ModelError as exc:
         log.warning("itinerary generation error code=%s", exc.code)
         status_code = 503 if exc.code == "NOT_CONFIGURED" else 502

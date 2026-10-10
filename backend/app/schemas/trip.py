@@ -105,10 +105,20 @@ class DayPlan(BaseModel):
     evening: str = Field(min_length=1, max_length=500)
 
 
+class RealPlace(BaseModel):
+    name: str = Field(min_length=1, max_length=160)
+    category: str = Field(min_length=1, max_length=60)
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    source_url: str
+    map_url: str
+
+
 class GeneratedItinerary(BaseModel):
     destination: str
     duration_days: int = Field(ge=1, le=15)
     days: list[DayPlan]
+    places: list[RealPlace] = Field(default_factory=list)
     itinerary_id: UUID | None = None
     saved_to_database: bool = False
     save_error: str | None = None

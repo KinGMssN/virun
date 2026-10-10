@@ -13,8 +13,11 @@ Updated 2026-10-10. A checked item is limited to what exists and has been verifi
 - [x] Render blueprint, Docker configuration, CI workflow, Supabase schema/seed/repository option, and integration setup docs are present.
 - [x] SQLAlchemy models and an Alembic bootstrap migration define the relational app schema, including transport tables.
 - [x] Groq-generated stay plans are persisted as `sightseeing` records in `public.itineraries`, with the generated day plan stored as JSONB and no invented transport fare or duration; generated plans remain visible in the Itinerary page and are clearly labeled if the database save fails.
+- [x] Supabase email/password and Google login use real Auth calls, redirect to the tourist dashboard by default, and support a safe internal `returnTo` route.
+- [x] Privacy and cookie notices, account-processing consent, and a persistent essential/optional cookie preference banner are present. No analytics tracker is active.
+- [x] Stay plans query real nearby OpenStreetMap places, cache and throttle public lookups, show map links and attribution, and avoid inventing venue names when lookup data is unavailable.
 - [x] Card entry has been removed from the payment preview; identity and government screens now clearly state that no real provider/access control is connected.
-- [x] Registration and sign-in screens no longer ask for account credentials; the privacy screen explains the backend and Groq data flow.
+- [x] Email/password registration and sign-in call Supabase Auth, Google OAuth uses the Supabase PKCE flow, and cookie/privacy disclosures describe current data flows.
 - [x] API frontend serving and Docker packaging use the single frontend entry point under `frontend/index.html`.
 - [x] API keys are read from ignored `backend/.env`; `.env.example` contains blank secret placeholders.
 
@@ -30,13 +33,13 @@ Updated 2026-10-10. A checked item is limited to what exists and has been verifi
 - [x] Guide discovery, requests, trip tracking, chat, and emergency controls are labeled as sample or non-live preview flows.
 - [x] Sample guide, review, pricing, dashboard, and destination visuals are identified as sample/preview content; no live weather forecast is claimed.
 - [ ] Create the Render project, add private Groq and RailRadar environment secrets, set production CORS origins, connect a domain, and configure monitoring, backups, and operational alerts. The project has not been created from this workspace.
-- [ ] Review and publish accurate privacy policy, terms, support contact, data-retention/deletion procedures, and applicable legal requirements before collecting user data or payments.
+- [ ] Have the deployment operator review the privacy/cookie notices and terms, add a real support contact, define data-retention/deletion procedures, and review applicable legal requirements before public launch.
 - [ ] Run the complete backend test suite and application-level smoke tests in a standard CPython environment. This workspace's MSYS Python has no compatible Pydantic Core wheel; installing dependencies falls back to a Rust build, but Rust is unavailable. Live provider checks above succeeded independently.
 
 ## Current data and product boundaries
 
-Groq powers natural-language trip parsing when configured. RailRadar provides real train schedules and live status when available; the live station and timetable calls were checked on 2026-10-10. It does not provide fares, seat inventory, or booking in this integration. Bundled planner and bus routes remain simulated and use fixed sample data. Authentication, guide workflows, payment, and booking are not production services yet.
+Groq powers natural-language trip parsing and stay suggestions when configured. RailRadar provides real train schedules and live status when available; it does not provide fares, seat inventory, or booking in this integration. Stay plans show nearby named OpenStreetMap features when available; opening status and completeness are not guaranteed. Bundled planner and bus routes remain simulated and use fixed sample data. Supabase Auth is integrated but needs live configuration verification; guide role enforcement, payment, and booking are not production services yet.
 
 ## Credentials
 
-Keep `GROQ_API_KEY`, `RAILRADAR_API_KEY`, `SUPABASE_KEY`, and `DATABASE_URL` only in ignored local `.env` files or private deployment secrets. Never place values in `.env.example`, frontend code, logs, or source control. Supabase URL, API key, and PostgreSQL connection URI are not configured yet.
+Keep `GROQ_API_KEY`, `RAILRADAR_API_KEY`, `SUPABASE_KEY`, and `DATABASE_URL` only in ignored local `.env` files or private deployment secrets. Never place values in `.env.example`, frontend code, logs, or source control. The local `backend/.env` currently has an empty `DATABASE_URL`; configure it before expecting database persistence locally.

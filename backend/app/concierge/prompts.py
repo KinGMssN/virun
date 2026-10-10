@@ -71,7 +71,8 @@ Use concise activity suggestions. Tailor the pace and suggestions to the supplie
 and maximum trip budget. Do not provide price quotes or claim current opening hours, prices,
 availability, or reservations; do not invent factual details. Keep a sensible pace and do not repeat
 the same attraction unless the user asks. These are AI-generated suggestions, not verified
-travel facts or bookings.
+travel facts or bookings. Do not invent or name specific venues. Real nearby places are displayed
+separately from verified OpenStreetMap records.
 
 Destination: {destination}
 Trip duration: exactly {duration_days} days
