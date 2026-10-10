@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 
 from app.concierge.model_adapter import MockAdapter, ModelError, get_adapter
+from app.concierge.agent_service import run_agent
 from app.concierge.itinerary_service import generate_itinerary
 from app.concierge.places_service import find_nearby_places
 from app.concierge.service import run_parse
@@ -29,7 +30,8 @@ def chat(req: ChatRequest):
         adapter = get_adapter()
         if not hasattr(adapter, "chat"):
             raise ModelError("NOT_CONFIGURED")
-        reply = adapter.chat(
+        reply = run_agent(
+            adapter,
             [turn.model_dump() for turn in req.history],
             req.message,
         )

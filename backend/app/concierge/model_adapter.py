@@ -103,6 +103,22 @@ class GroqAdapter:
         except Exception as exc:
             _raise_provider_error(exc)
 
+    def chat_with_tools(self, messages: list[dict], tools: list[dict]):
+        """One native OpenAI-compatible Groq tool-calling turn."""
+        try:
+            request = {
+                "model": self.model,
+                "messages": messages,
+                "temperature": 0.2,
+                "max_completion_tokens": 1000,
+            }
+            if tools:
+                request["tools"] = tools
+                request["tool_choice"] = "auto"
+            return self.client.chat.completions.create(**request).choices[0].message
+        except Exception as exc:
+            _raise_provider_error(exc)
+
 
 class MockAdapter:
     """Simple rule-based parser used when the model is unavailable.

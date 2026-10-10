@@ -1,0 +1,342 @@
+{
+  "source": "survey_probability_workbook.xlsx: Place Probability; all 20,000 survey rows marked simulated",
+  "equation": "P_place=(n*p_raw+k*p_base)/(n+k); Scale=(P_place-P_min)/(P_max-P_min)",
+  "places": [
+    {
+      "city": "Goa",
+      "place": "Anjuna Beach",
+      "responses": 421,
+      "p_good": 0.762330148619958,
+      "scale": 1.0
+    },
+    {
+      "city": "Goa",
+      "place": "Se Cathedral",
+      "responses": 423,
+      "p_good": 0.718937632135307,
+      "scale": 0.924319631682724
+    },
+    {
+      "city": "Goa",
+      "place": "Mangueshi Temple",
+      "responses": 433,
+      "p_good": 0.67713768115942,
+      "scale": 0.851416837796175
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Durgam Cheruvu (Secret Lake)",
+      "responses": 419,
+      "p_good": 0.658971215351812,
+      "scale": 0.819732922348927
+    },
+    {
+      "city": "Bengaluru",
+      "place": "Vidhana Soudha",
+      "responses": 375,
+      "p_good": 0.633076470588235,
+      "scale": 0.774570208131083
+    },
+    {
+      "city": "Goa",
+      "place": "Calangute Beach",
+      "responses": 439,
+      "p_good": 0.601344580777096,
+      "scale": 0.719226999143429
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Birla Mandir",
+      "responses": 404,
+      "p_good": 0.577219162995595,
+      "scale": 0.677150146924959
+    },
+    {
+      "city": "Goa",
+      "place": "Dudhsagar Falls",
+      "responses": 367,
+      "p_good": 0.544502398081535,
+      "scale": 0.620089229065502
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Nehru Zoological Park",
+      "responses": 390,
+      "p_good": 0.5433125,
+      "scale": 0.618013942072123
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Charminar",
+      "responses": 412,
+      "p_good": 0.534756493506494,
+      "scale": 0.603091513616455
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "Submarine Museum (INS Kurusura)",
+      "responses": 445,
+      "p_good": 0.503146464646465,
+      "scale": 0.547960840854184
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Laad Bazaar",
+      "responses": 437,
+      "p_good": 0.499091375770021,
+      "scale": 0.540888408909908
+    },
+    {
+      "city": "Bengaluru",
+      "place": "Commercial Street",
+      "responses": 478,
+      "p_good": 0.494427083333333,
+      "scale": 0.532753472332242
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "Borra Caves",
+      "responses": 389,
+      "p_good": 0.483046697038724,
+      "scale": 0.512905076891209
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "Araku Valley",
+      "responses": 368,
+      "p_good": 0.469037081339713,
+      "scale": 0.488471073934507
+    },
+    {
+      "city": "Goa",
+      "place": "Palolem Beach",
+      "responses": 441,
+      "p_good": 0.464475560081466,
+      "scale": 0.480515379338337
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Salar Jung Museum",
+      "responses": 434,
+      "p_good": 0.460862603305785,
+      "scale": 0.474214064695876
+    },
+    {
+      "city": "Goa",
+      "place": "Chapora Fort",
+      "responses": 367,
+      "p_good": 0.460569544364508,
+      "scale": 0.473702944106169
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Qutb Shahi Tombs",
+      "responses": 381,
+      "p_good": 0.459530162412993,
+      "scale": 0.471890170492524
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Ramoji Film City",
+      "responses": 510,
+      "p_good": 0.444745535714286,
+      "scale": 0.44610448013305
+    },
+    {
+      "city": "Bengaluru",
+      "place": "Bannerghatta National Park",
+      "responses": 431,
+      "p_good": 0.442946985446985,
+      "scale": 0.442967650151904
+    },
+    {
+      "city": "Bengaluru",
+      "place": "Wonderla",
+      "responses": 485,
+      "p_good": 0.433752336448598,
+      "scale": 0.426931372952074
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "VUDA Park",
+      "responses": 426,
+      "p_good": 0.395078781512605,
+      "scale": 0.359481288955916
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Golconda Fort",
+      "responses": 379,
+      "p_good": 0.38708041958042,
+      "scale": 0.345531441701107
+    },
+    {
+      "city": "Goa",
+      "place": "Baga Beach",
+      "responses": 421,
+      "p_good": 0.386533970276009,
+      "scale": 0.344578386013747
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Hussain Sagar Lake",
+      "responses": 415,
+      "p_good": 0.385069892473118,
+      "scale": 0.342024905452022
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Chowmahalla Palace",
+      "responses": 475,
+      "p_good": 0.371538095238095,
+      "scale": 0.318424259955845
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "Rushikonda Beach",
+      "responses": 396,
+      "p_good": 0.352146860986547,
+      "scale": 0.284604240533767
+    },
+    {
+      "city": "Bengaluru",
+      "place": "Bangalore Palace",
+      "responses": 407,
+      "p_good": 0.341482494529541,
+      "scale": 0.266004646716198
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "RK Beach",
+      "responses": 443,
+      "p_good": 0.340887423935091,
+      "scale": 0.264966791219188
+    },
+    {
+      "city": "Bengaluru",
+      "place": "Nandi Hills",
+      "responses": 362,
+      "p_good": 0.337518203883495,
+      "scale": 0.25909057487813
+    },
+    {
+      "city": "Goa",
+      "place": "Candolim Beach",
+      "responses": 401,
+      "p_good": 0.3305044345898,
+      "scale": 0.246857943852294
+    },
+    {
+      "city": "Bengaluru",
+      "place": "ISKCON Temple",
+      "responses": 403,
+      "p_good": 0.298140176600441,
+      "scale": 0.190411829098464
+    },
+    {
+      "city": "Bengaluru",
+      "place": "VV Puram Food Street",
+      "responses": 402,
+      "p_good": 0.294375,
+      "scale": 0.183845029682676
+    },
+    {
+      "city": "Goa",
+      "place": "Fort Aguada",
+      "responses": 391,
+      "p_good": 0.274506802721088,
+      "scale": 0.149193144756845
+    },
+    {
+      "city": "Hyderabad",
+      "place": "Lumbini Park",
+      "responses": 411,
+      "p_good": 0.26693600867679,
+      "scale": 0.1359890135346
+    },
+    {
+      "city": "Bengaluru",
+      "place": "Cubbon Park",
+      "responses": 375,
+      "p_good": 0.242488235294118,
+      "scale": 0.0933499447727686
+    },
+    {
+      "city": "Bengaluru",
+      "place": "Lalbagh Botanical Garden",
+      "responses": 417,
+      "p_good": 0.237810492505353,
+      "scale": 0.0851915495971305
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "Yarada Beach",
+      "responses": 426,
+      "p_good": 0.237515756302521,
+      "scale": 0.0846775037156322
+    },
+    {
+      "city": "Goa",
+      "place": "Basilica of Bom Jesus",
+      "responses": 452,
+      "p_good": 0.237166334661355,
+      "scale": 0.0840680816160667
+    },
+    {
+      "city": "Bengaluru",
+      "place": "Tipu Sultan's Summer Palace",
+      "responses": 377,
+      "p_good": 0.222617096018735,
+      "scale": 0.0586929287461275
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "Kailasagiri",
+      "responses": 453,
+      "p_good": 0.218802186878728,
+      "scale": 0.0520393914036953
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "Simhachalam Temple",
+      "responses": 450,
+      "p_good": 0.212115,
+      "scale": 0.0403763488565413
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "Thotlakonda Buddhist Complex",
+      "responses": 381,
+      "p_good": 0.21127030162413,
+      "scale": 0.0389031205355827
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "Dolphin's Nose",
+      "responses": 444,
+      "p_good": 0.208618421052632,
+      "scale": 0.0342780073906602
+    },
+    {
+      "city": "Bengaluru",
+      "place": "Bull Temple",
+      "responses": 418,
+      "p_good": 0.205251068376068,
+      "scale": 0.0284050479160324
+    },
+    {
+      "city": "Visakhapatnam",
+      "place": "Tenneti Park",
+      "responses": 410,
+      "p_good": 0.191429347826087,
+      "scale": 0.00429875063845757
+    },
+    {
+      "city": "Goa",
+      "place": "Fontainhas (Latin Quarter)",
+      "responses": 416,
+      "p_good": 0.188964592274678,
+      "scale": 0.0
+    }
+  ]
+}
