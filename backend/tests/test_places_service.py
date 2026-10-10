@@ -1,3 +1,5 @@
+from urllib.parse import unquote
+
 from app.concierge import places_service
 
 
@@ -34,6 +36,9 @@ def test_finds_named_osm_places_and_caches_results(monkeypatch):
     assert found[0]["category"] == "Monument"
     assert found[0]["source_url"].endswith("/node/123")
     assert "openstreetmap.org/?mlat=" in found[0]["map_url"]
+    query = unquote(calls[1][1].decode("utf-8"))
+    assert query.count("around:20000,") == 5
+    assert "[timeout:25]" in query
 
 
 def test_no_geocoder_result_returns_empty_without_overpass(monkeypatch):

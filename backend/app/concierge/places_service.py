@@ -19,6 +19,7 @@ _cache_lock = threading.Lock()
 _request_lock = threading.Lock()
 _last_request_at = 0.0
 _CACHE_SECONDS = 6 * 60 * 60
+_SEARCH_RADIUS_METERS = 20_000
 
 
 def _request_json(url: str, *, data: bytes | None = None) -> dict | list:
@@ -43,11 +44,11 @@ def _request_json(url: str, *, data: bytes | None = None) -> dict | list:
 
 
 def find_nearby_places(destination: str, limit: int = 20) -> list[dict]:
-    """Return named, real OSM attractions near the requested destination."""
+    """Return named OSM places within a city-scale radius of the destination."""
     query = " ".join(destination.strip().split())
     if not query:
         return []
-    key = query.casefold()
+    key = f"{query.casefold()}:{_SEARCH_RADIUS_METERS}"
     now = time.monotonic()
     with _cache_lock:
         cached = _cache.get(key)
@@ -67,13 +68,13 @@ def find_nearby_places(destination: str, limit: int = 20) -> list[dict]:
             raise ValueError("Invalid coordinates from geocoder")
 
         overpass_url = os.getenv("OSM_OVERPASS_URL", "https://overpass-api.de/api/interpreter").strip()
-        query_body = f"""[out:json][timeout:12];
+        query_body = f"""[out:json][timeout:25];
 (
-  nwr(around:7000,{lat:.6f},{lon:.6f})["tourism"~"^(attraction|museum|viewpoint|zoo|theme_park|gallery|aquarium)$"];
-  nwr(around:7000,{lat:.6f},{lon:.6f})["historic"~"^(monument|memorial|fort|castle|archaeological_site|ruins)$"];
-  nwr(around:7000,{lat:.6f},{lon:.6f})["leisure"="park"];
-  nwr(around:7000,{lat:.6f},{lon:.6f})["amenity"~"^(restaurant|cafe|fast_food|marketplace)$"];
-  nwr(around:7000,{lat:.6f},{lon:.6f})["shop"="marketplace"];
+  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["tourism"~"^(attraction|museum|viewpoint|zoo|theme_park|gallery|aquarium)$"];
+  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["historic"~"^(monument|memorial|fort|castle|archaeological_site|ruins)$"];
+  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["leisure"="park"];
+  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["amenity"~"^(restaurant|cafe|fast_food|marketplace)$"];
+  nwr(around:{_SEARCH_RADIUS_METERS},{lat:.6f},{lon:.6f})["shop"="marketplace"];
 );
 out center tags 60;"""
         data = urlencode({"data": query_body}).encode("utf-8")
