@@ -107,7 +107,30 @@ def test_includes_only_places_returned_by_the_places_provider(monkeypatch):
 
     assert response.status_code == 200
     assert response.json()["places"] == [place]
+    day = response.json()["days"][0]
+    assert day["morning_location"] == place
+    assert day["afternoon_location"] == place
+    assert day["evening_location"] == place
     assert "specific venues" in generator.prompt
+
+
+def test_plan_location_fields_are_empty_when_no_verified_places_exist(monkeypatch):
+    generator = FakeGenerator(
+        {"destination": "Goa", "duration_days": 1, "days": make_days(1)}
+    )
+    monkeypatch.setattr(router_module, "get_adapter", lambda: generator)
+    monkeypatch.setattr(router_module, "save_generated_itinerary", lambda **_: uuid4())
+
+    response = client.post(
+        "/api/generate-itinerary",
+        json={"destination": "Goa", "duration_days": 1},
+    )
+
+    assert response.status_code == 200
+    day = response.json()["days"][0]
+    assert day["morning_location"] is None
+    assert day["afternoon_location"] is None
+    assert day["evening_location"] is None
 
 
 def test_keeps_generated_plan_visible_when_database_is_not_configured(monkeypatch):

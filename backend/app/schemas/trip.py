@@ -97,14 +97,6 @@ class ItineraryGenerationRequest(BaseModel):
         return value.strip()
 
 
-class DayPlan(BaseModel):
-    day: int = Field(ge=1, le=15)
-    title: str = Field(min_length=1, max_length=120)
-    morning: str = Field(min_length=1, max_length=500)
-    afternoon: str = Field(min_length=1, max_length=500)
-    evening: str = Field(min_length=1, max_length=500)
-
-
 class RealPlace(BaseModel):
     name: str = Field(min_length=1, max_length=160)
     category: str = Field(min_length=1, max_length=60)
@@ -112,6 +104,17 @@ class RealPlace(BaseModel):
     longitude: float = Field(ge=-180, le=180)
     source_url: str
     map_url: str
+
+
+class DayPlan(BaseModel):
+    day: int = Field(ge=1, le=15)
+    title: str = Field(min_length=1, max_length=120)
+    morning: str = Field(min_length=1, max_length=500)
+    afternoon: str = Field(min_length=1, max_length=500)
+    evening: str = Field(min_length=1, max_length=500)
+    morning_location: RealPlace | None = None
+    afternoon_location: RealPlace | None = None
+    evening_location: RealPlace | None = None
 
 
 class GeneratedItinerary(BaseModel):

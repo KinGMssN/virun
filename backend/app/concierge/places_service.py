@@ -72,6 +72,8 @@ def find_nearby_places(destination: str, limit: int = 20) -> list[dict]:
   nwr(around:7000,{lat:.6f},{lon:.6f})["tourism"~"^(attraction|museum|viewpoint|zoo|theme_park|gallery|aquarium)$"];
   nwr(around:7000,{lat:.6f},{lon:.6f})["historic"~"^(monument|memorial|fort|castle|archaeological_site|ruins)$"];
   nwr(around:7000,{lat:.6f},{lon:.6f})["leisure"="park"];
+  nwr(around:7000,{lat:.6f},{lon:.6f})["amenity"~"^(restaurant|cafe|fast_food|marketplace)$"];
+  nwr(around:7000,{lat:.6f},{lon:.6f})["shop"="marketplace"];
 );
 out center tags 60;"""
         data = urlencode({"data": query_body}).encode("utf-8")
@@ -96,7 +98,7 @@ out center tags 60;"""
             place_lat = float(center["lat"])
             place_lon = float(center["lon"])
             category = next(
-                (str(tags[k]).replace("_", " ").title() for k in ("tourism", "historic", "leisure") if tags.get(k)),
+                (str(tags[k]).replace("_", " ").title() for k in ("tourism", "historic", "leisure", "amenity", "shop") if tags.get(k)),
                 "Place of interest",
             )
             places.append({
