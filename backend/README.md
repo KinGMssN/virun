@@ -21,7 +21,8 @@ then from the repository root run:
 python backend/scripts/local_frontend_proxy.py             # http://127.0.0.1:8001
 ```
 The root URL serves the Virun frontend from `../frontend/`. General text and voice
-questions use `/api/chat` and Groq, with up to eight recent conversation turns. Trip
+questions use `/api/chat` and Groq, with up to eight recent conversation turns. The stay-plan
+and saved-itinerary pages show verified OpenStreetMap places on a Leaflet map. Trip
 requests ask for a 1–15 day destination stay, parse details with Groq, check transport,
 and request a separate day-by-day sightseeing suggestion. API documentation is at
 `http://127.0.0.1:8000/docs`; bundled
