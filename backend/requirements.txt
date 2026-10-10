@@ -5,3 +5,6 @@ tzdata>=2024.1          # needed for zoneinfo on Windows
 python-dotenv>=1.0
 openai>=1.0             # required by app.concierge.model_adapter
 supabase>=2.4            # required when TRANSPORT_REPOSITORY=supabase
+SQLAlchemy>=2.0,<3.0
+alembic>=1.13
+psycopg[binary]>=3.1

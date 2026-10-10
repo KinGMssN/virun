@@ -36,7 +36,7 @@ _RESOURCES = Path(__file__).resolve().parent.parent / "resources"
 if _RESOURCES.is_dir():
     app.mount("/resources", StaticFiles(directory=str(_RESOURCES)), name="resources")
 
-_FRONTEND = Path(__file__).resolve().parents[2] / "Index (2).html"
+_FRONTEND = Path(__file__).resolve().parents[2] / "index.html"
 
 
 @app.get("/", include_in_schema=False)

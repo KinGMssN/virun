@@ -76,11 +76,43 @@ Weights and buffers live in `PlannerConfig`.
 `TRANSPORT_REPOSITORY=json` (default) or `supabase` (set `SUPABASE_URL`, `SUPABASE_KEY`).
 For this read-only planner repository, use the Supabase anon/public key with the included
 read-only row-level security policies; never use a `service_role` key in this app.
-Schema: `supabase/migrations/001_initial_schema.sql`; seed: `supabase/seed_demo_data.sql`
-(regenerate with `python scripts/generate_seed_sql.py`). The planning code does not change.
+The SQL file under `supabase/migrations/` is the legacy transport-only schema. New schema
+creation uses the SQLAlchemy/Alembic migration below. The planner contract does not change.
 The Supabase repository has offline contract tests using a fake client, including pagination.
 A live Supabase check still requires a configured project and credentials; do not put its
 service key in source control.
+
+## Relational schema (SQLAlchemy + Alembic)
+
+SQLAlchemy models live in `app/db/models.py`; Alembic creates schema changes. The first
+migration creates the app tables and enables RLS. Private account/trip tables have no
+PostgREST policies yet, so they remain inaccessible through Supabase's API until
+authentication and authorization are implemented. Supabase Auth owns `auth.users`.
+
+The public schema tables are `profiles`, `roles`, `profile_roles`, `guide_profiles`,
+`guide_languages`, `guide_profile_languages`, `guide_services`, `guide_availability`,
+`destinations`, `attractions`, `trip_requests`, `itineraries`, `itinerary_legs`,
+`bookings`, `booking_legs`, `payments`, `reviews`, `conversations`,
+`conversation_participants`, `messages`, `trip_events`, `transport_stops`, and
+`transport_options`. The migration references Supabase Auth's `auth.users` table but
+never creates or drops it.
+
+To apply the schema to Supabase PostgreSQL, put its PostgreSQL connection URI in
+`DATABASE_URL` in the ignored `.env` file, then run from `backend/`:
+
+```bash
+alembic upgrade head
+```
+
+To load the clearly labeled planner demo records after migration, run:
+
+```bash
+python scripts/seed_transport_database.py
+```
+
+`DATABASE_URL` is the database connection URI (including its database password), not
+the Supabase anon API key. Keep both private. The runtime planner uses `SUPABASE_URL`
+and `SUPABASE_KEY` when `TRANSPORT_REPOSITORY=supabase`.
 
 ## Docker and Render
 From the repository root:

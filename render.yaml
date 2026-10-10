@@ -14,5 +14,11 @@ services:
         value: openai/gpt-oss-20b
       - key: RAILRADAR_API_KEY
         sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
       - key: TRANSPORT_REPOSITORY
         value: json

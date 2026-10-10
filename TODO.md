@@ -11,18 +11,22 @@ Updated 2026-10-10. A checked item is limited to what exists and has been verifi
 - [x] Rail results clearly omit fares, seat inventory, and booking because the configured provider does not supply those services.
 - [x] Bundled transport data is identified as simulated; bus fares and availability are not represented as live.
 - [x] Render blueprint, Docker configuration, CI workflow, Supabase schema/seed/repository option, and integration setup docs are present.
+- [x] SQLAlchemy models and an Alembic bootstrap migration define the relational app schema, including transport tables.
+- [x] Card entry has been removed from the payment preview; identity and government screens now clearly state that no real provider/access control is connected.
+- [x] Registration and sign-in screens no longer ask for account credentials; the privacy screen explains the backend and Groq data flow.
+- [x] API frontend serving and Docker packaging now point to the existing root `index.html` (the old `Index (2).html` path did not exist).
 - [x] API keys are read from ignored `backend/.env`; `.env.example` contains blank secret placeholders.
 
 ## Still required before production
 
 - [ ] Choose and contract a live bus provider that supplies schedules, fares, and inventory; add its credentials and integration.
 - [ ] Decide which account roles to support and select an identity/authentication provider; implement server-side registration, sessions, and authorization. Current frontend role selection and demo checks are not secure authentication.
-- [ ] Select and provision a production database; implement migrations and persistent user, guide, trip, booking, and review data with access controls. The current JSON planner and optional Supabase repository do not provide those product records.
+- [ ] Add the Supabase PostgreSQL `DATABASE_URL`, apply `alembic upgrade head`, and verify the migration. Runtime Supabase REST keys are still blank; private-table RLS policies and application CRUD/auth flows remain to be implemented.
 - [ ] Choose a booking provider and implement confirmed booking, cancellation, and status synchronization. Until then, the app is a planner and must not claim a reservation was made.
 - [ ] Choose a payment processor and implement server-side payment intents, verified webhooks, refunds, and state transitions before accepting payments. Do not collect or store card details in this app.
-- [ ] Either integrate an approved identity-verification service with a reviewed sensitive-data process or remove identity-verification claims and controls.
-- [ ] Either implement guide discovery, availability, requests, messaging, trip tracking, and emergency workflows or keep those screens clearly marked as demo-only.
-- [ ] Replace remaining sample destination, guide, review, pricing, weather, and dashboard content with verified sources or ensure every affected screen labels it as sample content.
+- [x] Identity verification controls were removed from the frontend preview; no document submission is offered.
+- [x] Guide discovery, requests, trip tracking, chat, and emergency controls are labeled as sample or non-live preview flows.
+- [x] Sample guide, review, pricing, dashboard, and destination visuals are identified as sample/preview content; no live weather forecast is claimed.
 - [ ] Create the Render project, add private Groq and RailRadar environment secrets, set production CORS origins, connect a domain, and configure monitoring, backups, and operational alerts. The project has not been created from this workspace.
 - [ ] Review and publish accurate privacy policy, terms, support contact, data-retention/deletion procedures, and applicable legal requirements before collecting user data or payments.
 - [ ] Run the complete backend test suite and application-level smoke tests in a standard CPython environment. This workspace's MSYS Python has no compatible Pydantic Core wheel; installing dependencies falls back to a Rust build, but Rust is unavailable. Live provider checks above succeeded independently.
@@ -33,4 +37,4 @@ Groq powers natural-language trip parsing when configured. RailRadar provides re
 
 ## Credentials
 
-Keep `GROQ_API_KEY` and `RAILRADAR_API_KEY` only in ignored local `.env` files or private deployment secrets. Never place values in `.env.example`, frontend code, logs, or source control.
+Keep `GROQ_API_KEY`, `RAILRADAR_API_KEY`, `SUPABASE_KEY`, and `DATABASE_URL` only in ignored local `.env` files or private deployment secrets. Never place values in `.env.example`, frontend code, logs, or source control. Supabase URL, API key, and PostgreSQL connection URI are not configured yet.

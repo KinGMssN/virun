@@ -12,7 +12,7 @@ RUN python -m pip install --no-cache-dir --upgrade pip \
 
 COPY backend/app ./app
 COPY backend/resources ./resources
-COPY ["Index (2).html", "/app/Index (2).html"]
+COPY index.html /app/index.html
 
 RUN useradd --create-home --uid 10001 appuser \
     && chown -R appuser:appuser /app
