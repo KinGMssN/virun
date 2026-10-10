@@ -1,5 +1,15 @@
+<<<<<<< HEAD
 fastapi>=0.110
 uvicorn[standard]>=0.29
 pydantic>=2.6
 tzdata>=2024.1          # needed for zoneinfo on Windows
 # supabase>=2.4         # uncomment ONLY when using TRANSPORT_REPOSITORY=supabase
+=======
+fastapi
+uvicorn
+pydantic>=2
+python-dotenv
+openai
+pytest
+httpx
+>>>>>>> 866f4aee9638c06f229b91e8870d10997fdb4d8f
