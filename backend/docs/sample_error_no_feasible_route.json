@@ -1,0 +1,17 @@
+{
+  "error": {
+    "code": "NO_FEASIBLE_ROUTE",
+    "message": "No route satisfies the current arrival deadline.",
+    "details": {
+      "reason": "DEADLINE_EXCEEDED",
+      "candidates_evaluated": 10,
+      "rejections": {
+        "UNAVAILABLE_LEG": 2,
+        "INSUFFICIENT_TRANSFER_TIME": 1,
+        "DEADLINE_EXCEEDED": 9
+      },
+      "closest_route_key": "TRAIN-DEMO-001+BUS-DEMO-006",
+      "search_truncated": false
+    }
+  }
+}

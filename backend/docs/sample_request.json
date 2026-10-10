@@ -1,0 +1,13 @@
+{
+  "origin": "Visakhapatnam",
+  "destination": "Hitech City, Hyderabad",
+  "departure_date": "2026-10-11",
+  "arrival_deadline": "2026-10-12T09:00:00+05:30",
+  "timezone": "Asia/Kolkata",
+  "passengers": 1,
+  "budget_inr": 1200,
+  "bus_preference": "sleeper",
+  "ac_preference": "preferred",
+  "has_luggage": true,
+  "priority": "balanced"
+}

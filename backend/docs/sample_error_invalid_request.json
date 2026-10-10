@@ -1,0 +1,12 @@
+{
+  "error": {
+    "code": "INVALID_REQUEST",
+    "message": "The trip request is invalid.",
+    "details": [
+      {
+        "field": "passengers",
+        "message": "Input should be greater than or equal to 1"
+      }
+    ]
+  }
+}
