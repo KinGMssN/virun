@@ -11,6 +11,10 @@ a{color:inherit;text-decoration:none}
 button,a,input,select,textarea{outline-color:var(--accent)}
 img{display:block;max-width:100%}
 svg{display:block}
+#scene{display:none;position:fixed;inset:0;z-index:-3;background-size:cover;background-position:center;overflow:hidden}
+#scene:after{content:"";position:absolute;inset:0;z-index:1;background:rgba(6,24,31,.65)}
+.scene-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;animation:goaScene 90s linear infinite}
+#weather{position:fixed;inset:0;width:100%;height:100%;z-index:-2;pointer-events:none;display:none}
 body.app-mode #scene,body.app-mode #weather{display:block}
 body.app-mode{background:transparent;background-color:#0B1F2A}
 body.app-mode #main{min-height:100vh}
