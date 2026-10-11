@@ -91,7 +91,7 @@ def generate_trip_itinerary(req: ItineraryGenerationRequest):
             status_code=status_code,
             detail={
                 "code": exc.code,
-                "message": message,
+                "message": f"{message} (error code: {exc.code})",
             },
         ) from exc
     try:

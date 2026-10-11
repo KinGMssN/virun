@@ -115,6 +115,8 @@ class GroqAdapter:
             if tools:
                 request["tools"] = tools
                 request["tool_choice"] = "auto"
+                # GPT-OSS 20B does not support parallel tool calls on Groq.
+                request["parallel_tool_calls"] = False
             return self.client.chat.completions.create(**request).choices[0].message
         except Exception as exc:
             _raise_provider_error(exc)
