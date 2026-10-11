@@ -24,7 +24,7 @@
     var V = window.Virun;
     var links = [
       ['tourist-dashboard.html', 'Dashboard'], ['journey-search.html', 'Train &amp; Bus'],
-      ['discovery.html', 'Discover'], ['tourist-profile.html', 'Profile']
+      ['discovery.html', 'Discover'], ['agent.html', 'Agent'], ['tourist-profile.html', 'Profile']
     ];
     return '<header class="app-top"><div class="app-top-inner">' +
       '<div class="trip-switch"><label for="citySelect">Choose My Trip</label>' +

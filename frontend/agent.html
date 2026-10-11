@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virun — Travel Agent</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+<style>
+.agent-mode{display:inline-block;font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.agent-mode.live{background:#d1fae5;color:#065f46;border-color:#6ee7b7}
+#agentTrace{display:none;margin:12px 0;border:1px dashed var(--line);border-radius:10px;padding:10px;background:rgba(0,0,0,.03)}
+.agent-trace-row{display:flex;gap:8px;align-items:baseline;font-size:12px;padding:4px 0;font-family:ui-monospace,monospace;flex-wrap:wrap}
+.agent-trace-tool{font-weight:700;color:#0ea5e9}
+.agent-trace-args{color:#64748b;flex:1;min-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.agent-trace-ok{color:#059669;font-weight:700}
+.agent-trace-fail{color:#dc2626;font-weight:700}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:8px 14px;font-size:13px;cursor:pointer}
+.chip:hover{border-color:#2dd4bf}
+#trackPanel{display:none;margin-top:12px}
+#trackCanvas{width:100%;border-radius:12px;display:block}
+.hotel-card{margin:10px 0}
+.muted{color:#64748b;font-size:13px}
+</style>
+</head>
+<body data-nav="app" data-active="agent.html">
+<a class="skip" href="#main">Skip to content</a>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="weather" aria-hidden="true"></canvas>
+<div id="nav"></div>
+<main id="main">
+<section class="app-page"><div class="app-shell">
+<div class="page-head"><div>
+<p class="eyebrow">Agentic AI · demo</p>
+<h1>Virun Agent <span class="agent-mode" id="agentMode">Demo data</span></h1>
+<p>Plans trips, searches hotels, tracks you live, and hands off to Rapido. Tool calls are shown as they happen.</p>
+</div></div>
+
+<article class="card">
+<div class="chat-log" id="agentLog" aria-live="polite"></div>
+<div id="agentTrace" aria-label="Agent activity"></div>
+<div class="chip-row">
+<button class="chip" data-agent-chip="hotels in Goa" type="button">Hotels in Goa</button>
+<button class="chip" data-agent-chip="track my trip" type="button">Track my trip</button>
+<button class="chip" data-agent-chip="book me a rapido" type="button">Rapido ride</button>
+</div>
+<form class="action-row" id="agentForm">
+<input id="agentInput" aria-label="Ask the agent" placeholder="Ask: hotels in Mumbai, track my trip, rapido…" style="flex:1;min-width:180px;border:1px solid var(--line);border-radius:10px;padding:11px;background:var(--paper);color:var(--ink)">
+<button class="btn" type="submit">Send</button>
+</form>
+</article>
+
+<div id="agentHotels"></div>
+<div id="agentRapido"></div>
+
+<article class="card" id="trackPanel">
+<h3>Live trip tracking</h3>
+<p class="muted" id="trackStatus">Idle.</p>
+<canvas id="trackCanvas" height="260"></canvas>
+<div class="action-row" style="margin-top:10px">
+<button class="btn small" id="trackBtn" type="button">Start live tracking</button>
+<button class="btn small" id="trackStop" type="button">Stop</button>
+</div>
+<p class="muted">Uses your phone's GPS with your permission (HTTPS). If unavailable, a mock route plays instead.</p>
+</article>
+
+</div></section>
+</main>
+<div id="mobileNav"></div>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/bot.js"></script>
+<script src="js/agent.js"></script>
+<script src="js/boot.js"></script>
+</body>
+</html>
