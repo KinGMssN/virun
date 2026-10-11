@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virun — Discovery feed</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-nav="app" data-active="discovery.html">
+<a class="skip" href="#main">Skip to content</a>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="weather" aria-hidden="true"></canvas>
+<div id="nav"></div>
+<main id="main">
+<section class="app-page"><div class="app-shell"><div class="page-head"><div><p class="eyebrow"><span data-fill="city"></span> trip</p><h1>Discovery feed</h1><p>54 destination photos across seven cities, including 15 views across Goa.</p></div></div><div class="feed" id="discoveryFeed"></div></div></section>
+</main>
+<div id="mobileNav"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/bot.js"></script>
+
+<script src="js/boot.js"></script>
+<script>(function(){var D=window.VirunData;var a=[];Object.keys(D.cityPhotoCounts).forEach(function(c){for(var n=1;n<=D.cityPhotoCounts[c];n++)a.push([c,n]);});function pname(c,n){return c==='Goa'?D.goaPhotoNames[n-1]:c+' travel scene '+n;}document.getElementById('discoveryFeed').innerHTML=a.map(function(x){var k=x[0].toLowerCase(),src='resources/images/'+k+'/photos/'+k+'_'+String(x[1]).padStart(2,'0')+'.jpg',label=pname(x[0],x[1]);return '<figure><img src="'+src+'" alt="'+label+'" loading="lazy"><figcaption>'+x[0]+' \u00b7 '+(x[0]==='Goa'?label:String(x[1]).padStart(2,'0'))+'</figcaption></figure>'}).join('');})();</script>
+</body>
+</html>

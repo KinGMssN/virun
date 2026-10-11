@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virun — Create guide profile</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/auth.css">
+</head>
+<body data-nav="public" data-active="guide-details.html">
+<a class="skip" href="#main">Skip to content</a>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="weather" aria-hidden="true"></canvas>
+<div id="nav"></div>
+<main id="main">
+<section class="auth-wrap"><form class="auth-card" id="guideDetailsForm" data-goto="guide-verification.html"><h1>Create your guide profile</h1><p>Provide the basics, then continue to verification.</p><div class="form-grid"><div class="field"><label>Name</label><input required></div><div class="field"><label>Phone</label><input required type="tel"></div><div class="field"><label>City</label><select><option>Visakhapatnam</option><option>Vizianagaram</option><option>Bangalore</option><option>Goa</option></select></div><div class="field"><label>Years guiding</label><input required type="number" min="0"></div></div><div class="field"><label>City knowledge</label><input type="range" min="1" max="5" value="4"></div><div class="field"><label>Languages</label><input value="English, Telugu, Hindi"></div><button class="btn coral" type="submit">Continue to verification</button></form></section>
+</main>
+<div id="mobileNav"></div>
+<div id="footer"></div>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/bot.js"></script>
+
+<script src="js/boot.js"></script>
+
+</body>
+</html>

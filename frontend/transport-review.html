@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virun — Review booking</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-nav="app" data-active="transport-review.html">
+<a class="skip" href="#main">Skip to content</a>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="weather" aria-hidden="true"></canvas>
+<div id="nav"></div>
+<main id="main">
+<section class="app-page"><div class="app-shell"><div class="page-head"><div><p class="eyebrow"><span data-fill="city"></span> trip</p><h1>Review before API handoff</h1><p>This is not a booking confirmation. It is the final frontend state for your team to connect to a booking API.</p></div></div><div class="grid two"><article class="card"><span class="tag">NOT BOOKED</span><h2 style="margin-top:14px" id="revName"></h2><div class="list" style="margin-top:18px" id="revList"></div></article><article class="card"><h2>Backend connection point</h2><p>Send the selected option ID, route, date and passenger payload to your booking API. The production response should replace this panel with a real reference and verified status.</p><div class="action-row"><a class="btn" href="tourist-dashboard.html">Return to dashboard</a><a class="btn secondary" href="transport-options.html">Choose another option</a></div></article></div></div></section>
+</main>
+<div id="mobileNav"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/bot.js"></script>
+
+<script src="js/boot.js"></script>
+<script>(function(){var V=window.Virun,D=window.VirunData;var j=V.store.getJSON('journey',{from:'Visakhapatnam',to:'Hyderabad',date:'',mode:'all'});var id=V.store.get('transportChoice','');var o=null;D.mockTransportOptions.forEach(function(x){if(x.id===id)o=x;});if(!o)o=D.mockTransportOptions[0];function fmtDate(){if(!j.date)return 'Choose a date';var d=new Date(j.date+'T12:00:00');return isNaN(d)?j.date:d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});}document.getElementById('revName').textContent=o.name;document.getElementById('revList').innerHTML='<div class="list-row"><span>Route</span><strong>'+j.from+' \u2192 '+j.to+'</strong></div><div class="list-row"><span>Travel date</span><strong>'+fmtDate()+'</strong></div><div class="list-row"><span>Departure</span><strong>'+o.depart+'</strong></div><div class="list-row"><span>Sample fare</span><strong>\u20b9'+o.fare.toLocaleString('en-IN')+'</strong></div>';})();</script>
+</body>
+</html>

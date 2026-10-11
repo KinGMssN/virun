@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virun — Plan journey</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-nav="app" data-active="journey-search.html">
+<a class="skip" href="#main">Skip to content</a>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="weather" aria-hidden="true"></canvas>
+<div id="nav"></div>
+<main id="main">
+<section class="app-page"><div class="app-shell"><div class="page-head"><div><p class="eyebrow"><span data-fill="city"></span> trip</p><h1>Where are you going?</h1><p>Choose your starting city, destination and travel date. The example route is Visakhapatnam to Hyderabad.</p></div></div><div class="notice mock-banner"><div><strong>Frontend transport demo</strong><br><span>Schedules, fares and seat counts on the next page are mock data. Your team can replace the marked data array with API results.</span></div><span class="tag accent">MOCK DATA</span></div><form id="journeyForm" class="card journey-form"><div class="field"><label for="journeyFrom">From</label><select id="journeyFrom"></select></div><button class="btn secondary swap-route" id="swapRoute" type="button" aria-label="Swap From and To">⇄</button><div class="field"><label for="journeyTo">To</label><select id="journeyTo"></select></div><div class="field"><label for="journeyDate">Travel date</label><input id="journeyDate" type="date" required></div><div class="field"><label for="journeyMode">Show</label><select id="journeyMode"><option value="all">Trains and buses</option><option value="train">Trains only</option><option value="bus">Buses only</option></select></div><button class="btn coral" type="submit">Search mock options</button></form><div class="grid two" style="margin-top:20px"><article class="card"><span class="tag">Example route</span><h2 style="margin-top:14px">Visakhapatnam → Hyderabad</h2><p>Use this preselected route, choose a date, then compare train and bus cards.</p></article><article class="card"><span class="tag">Backend swap-in point</span><h2 style="margin-top:14px">One normalized result shape</h2><p>Replace <strong>mockTransportOptions</strong> with API responses using the same fields: mode, times, fare, seats and class.</p></article></div></div></section>
+</main>
+<div id="mobileNav"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/bot.js"></script>
+
+<script src="js/boot.js"></script>
+<script>(function(){var V=window.Virun,D=window.VirunData;var j=V.store.getJSON('journey',{from:'Visakhapatnam',to:'Hyderabad',date:'',mode:'all'});function opts(sel,val){document.getElementById(sel).innerHTML=D.journeyCities.map(function(c){return '<option'+(c===val?' selected':'')+'>'+c+'</option>'}).join('');}opts('journeyFrom',j.from);opts('journeyTo',j.to);document.getElementById('journeyDate').value=j.date||'';document.getElementById('journeyMode').value=j.mode||'all';})();</script>
+</body>
+</html>

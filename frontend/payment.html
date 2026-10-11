@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virun — Payment preview</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-nav="app" data-active="payment.html">
+<a class="skip" href="#main">Skip to content</a>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="weather" aria-hidden="true"></canvas>
+<div id="nav"></div>
+<main id="main">
+<section class="app-page"><div class="app-shell"><div class="page-head"><div><p class="eyebrow"><span data-fill="city"></span> trip</p><h1>Payment preview</h1><p>This is a visual mock. No card data is sent or stored.</p></div></div><form class="card" data-goto="active-trip.html"><div class="form-grid"><div class="field"><label>Name on card</label><input required></div><div class="field"><label>Card number</label><input required inputmode="numeric" placeholder="0000 0000 0000 0000"></div><div class="field"><label>Expiry</label><input required placeholder="MM/YY"></div><div class="field"><label>Security code</label><input required inputmode="numeric"></div></div><div class="notice">Demo only: payment processing is not connected.</div><button class="btn coral" type="submit" style="margin-top:18px">Continue to active trip</button></form></div></section>
+</main>
+<div id="mobileNav"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/bot.js"></script>
+
+<script src="js/boot.js"></script>
+
+</body>
+</html>

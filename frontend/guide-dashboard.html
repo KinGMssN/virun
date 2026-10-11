@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virun — Guide dashboard</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body data-nav="guide" data-active="guide-dashboard.html">
+<a class="skip" href="#main">Skip to content</a>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="weather" aria-hidden="true"></canvas>
+<div id="nav"></div>
+<main id="main">
+<section class="app-page"><div class="app-shell"><div class="page-head"><div class="guide-top"><div class="avatar" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3"><circle cx="32" cy="22" r="12"/><path d="M10 58c2-14 10-22 22-22s20 8 22 22"/></svg></div><div><p class="eyebrow">Guide workspace</p><h1><span data-fill="username"></span></h1><p><span data-fill="city"></span> · Verification pending</p></div></div><div class="grid three" style="margin-top:20px"><div class="metric"><strong>3</strong><span>Tours completed</span></div><div class="metric"><strong>4</strong><span>Known cities</span></div><div class="metric"><strong>Not connected</strong><span>Payout account</span></div></div></div><div class="grid two" style="margin-top:20px"><article class="card"><h2>Next actions</h2><div class="list"><div class="list-row"><span>Review booking requests</span><a class="btn small" href="guide-requests.html">Open</a></div><div class="list-row"><span>Check payout flow</span><a class="btn secondary small" href="guide-earnings.html">Open</a></div></div></article><article class="card"><h2>Your public profile</h2><p>Keep city knowledge, languages and support modes clear for travelers.</p><a class="btn secondary" href="guide-profile.html" style="margin-top:18px">View guide profile</a></article></div>
+<div class="grid two" style="margin-top:20px">
+<article class="card"><h2>Previous works</h2><div class="list" style="margin-top:18px">
+<div class="list-row"><div><h3>Old City heritage walk</h3><p>Hyderabad · Charminar, Laad Bazaar and Chowmahalla — 4 hours, offline</p></div><span class="tag accent">Done</span></div>
+<div class="list-row"><div><h3>Coastal sunrise tour</h3><p>Visakhapatnam · Rushikonda Beach and Kailasagiri — 3 hours, offline</p></div><span class="tag accent">Done</span></div>
+<div class="list-row"><div><h3>Fort stories video call</h3><p>Goa · Aguada Fort history session — 45 minutes, online</p></div><span class="tag accent">Done</span></div>
+</div></article>
+<article class="card"><h2>Known cities</h2><p>Tap to toggle the cities you guide in.</p>
+<div class="chips" style="margin-top:18px">
+<button class="chip picked" data-knc>Visakhapatnam</button><button class="chip picked" data-knc>Hyderabad</button><button class="chip picked" data-knc>Goa</button><button class="chip" data-knc>Vijayawada</button><button class="chip" data-knc>Chennai</button><button class="chip" data-knc>Bengaluru</button><button class="chip" data-knc>Delhi</button>
+</div></article>
+</div>
+<div class="grid two" style="margin-top:20px">
+<article class="card"><h2>Tour examples</h2><div class="list" style="margin-top:18px">
+<div class="list-row"><div><h3>City orientation walk</h3><p>3 hours · Offline · Rs 600 — first-day route: landmarks, food streets and local transport basics.</p></div></div>
+<div class="list-row"><div><h3>Heritage deep-dive</h3><p>Full day · Offline · Rs 1,200 — forts, old quarters and stories, with a lunch stop.</p></div></div>
+<div class="list-row"><div><h3>Plan-my-day video call</h3><p>45 minutes · Online · Rs 150 — route review and local tips before the trip.</p></div></div>
+</div></article>
+<article class="card"><h2>Languages &amp; support modes</h2><div class="list" style="margin-top:18px">
+<div class="list-row"><span>Languages</span><strong>English, Telugu, Hindi</strong></div>
+<div class="list-row"><span>Online</span><strong>Video call · Rs 150 / session</strong></div>
+<div class="list-row"><span>Offline</span><strong>In-person companion · Rs 600 / day</strong></div>
+</div></article>
+</div>
+<div class="grid two" style="margin-top:20px">
+<article class="card"><h2>Availability</h2><p>Travelers only see you when this is on.</p>
+<button class="btn" id="availToggle" aria-pressed="true" style="margin-top:18px"><span>Available now</span></button></article>
+<article class="card"><h2>Verification checklist</h2><div class="list" style="margin-top:18px">
+<div class="list-row"><span>DigiLocker identity</span><span class="tag accent">Pending</span></div>
+<div class="list-row"><span>ID document</span><span class="tag accent">Pending</span></div>
+<div class="list-row"><span>City-knowledge check</span><span class="tag">Not started</span></div>
+</div><a class="btn secondary" href="guide-verification.html" style="margin-top:18px">Open verification</a></article>
+</div>
+</div></section>
+</main>
+<div id="mobileNav"></div>
+
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/bot.js"></script>
+
+<script src="js/boot.js"></script>
+
+</body>
+</html>

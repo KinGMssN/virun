@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virun — Create Account</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/auth.css">
+</head>
+<body data-nav="public" data-active="signup.html">
+<a class="skip" href="#main">Skip to content</a>
+<div id="scene" aria-hidden="true"></div>
+<canvas id="weather" aria-hidden="true"></canvas>
+<div id="nav"></div>
+<main id="main">
+<section class="auth-wrap"><form class="auth-card" id="createAccountForm"><h1>Create Account</h1><p>Enter your details and choose how you will use Virun. Nothing is sent or stored in this frontend demo.</p><button class="btn secondary" type="button" id="googleSignup" style="width:100%;margin-bottom:8px">Continue with Google <span aria-hidden="true">G</span></button><p class="hint" id="googleSignupHint" style="display:none;margin:0 0 18px;color:var(--muted)" role="status" aria-live="polite"></p><div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;color:var(--muted)"><span style="height:1px;background:var(--line);flex:1"></span><span>or use your details</span><span style="height:1px;background:var(--line);flex:1"></span></div><div class="form-grid"><div class="field"><label for="accountName">Full name</label><input id="accountName" required autocomplete="name"></div><div class="field"><label for="accountEmail">Email</label><input id="accountEmail" required type="email" autocomplete="email"></div><div class="field"><label for="accountPhone">Phone</label><input id="accountPhone" required type="tel" autocomplete="tel"></div><div class="field"><label for="accountBirth">Birth date</label><input id="accountBirth" required type="date"></div><div class="field"><label for="accountAge">Age</label><input id="accountAge" required type="number" min="18" inputmode="numeric"></div><div class="field"><label for="accountTravels">Recent travels</label><input id="accountTravels" required placeholder="Cities or regions"></div><div class="field"><label for="accountCountry">Country</label><input id="accountCountry" required autocomplete="country-name"></div><div class="field"><label for="accountCity">State / city</label><input id="accountCity" required autocomplete="address-level1"></div><div class="field"><label for="accountPassword">Password</label><input id="accountPassword" required type="password" minlength="8" autocomplete="new-password"></div><div class="field"><label for="accountConfirm">Confirm password</label><input id="accountConfirm" required type="password" minlength="8" autocomplete="new-password"></div></div><div class="field"><label for="accountRole">Account type</label><select id="accountRole" required><option value="tourist">Tourist</option><option value="guide">Guide</option></select></div><div id="accountError" class="error hidden" role="alert">Passwords must match.</div><button class="btn coral" type="submit" style="width:100%">Create Account <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button><p style="margin-top:16px">Already have an account? <a href="signin.html" style="color:var(--primary);font-weight:700">Sign in</a></p></form></section>
+</main>
+<div id="mobileNav"></div>
+<div id="footer"></div>
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/bot.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/auth-backend.js"></script>
+<script src="js/boot.js"></script>
+
+</body>
+</html>
