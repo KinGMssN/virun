@@ -105,6 +105,34 @@ def _run_tool(name, args, adapter):
     raise ValueError("Unknown tool")
 
 
+def _assistant_tool_message(response, calls):
+    """Replay Groq's full assistant message, including GPT-OSS reasoning metadata."""
+    dump = {}
+    model_dump = getattr(response, "model_dump", None)
+    if callable(model_dump):
+        try:
+            dump = model_dump(exclude_none=True)
+        except TypeError:
+            dump = model_dump()
+    message = {"role": "assistant"}
+    for field in ("content", "refusal", "reasoning", "reasoning_details"):
+        if field in dump and dump[field] is not None:
+            message[field] = dump[field]
+        elif not dump:
+            value = getattr(response, field, None)
+            if value is not None:
+                message[field] = value
+    dumped_calls = dump.get("tool_calls") if dump else None
+    if dumped_calls:
+        message["tool_calls"] = dumped_calls
+    else:
+        message["tool_calls"] = [
+            {"id": call.id, "type": "function", "function": {"name": call.function.name, "arguments": call.function.arguments}}
+            for call in calls
+        ]
+    return message
+
+
 def run_agent(adapter, history, message):
     """Execute at most six model/tool cycles and return the final assistant text."""
     if not hasattr(adapter, "chat_with_tools"):
@@ -120,13 +148,7 @@ def run_agent(adapter, history, message):
             if content:
                 return content
             raise ValueError("Model returned no final response")
-        assistant_msg = {"role": "assistant", "content": getattr(response, "content", None), "tool_calls": []}
-        reasoning = getattr(response, "reasoning", None)
-        if reasoning is not None:
-            assistant_msg["reasoning"] = reasoning
-        for call in calls:
-            assistant_msg["tool_calls"].append({"id": call.id, "type": "function", "function": {"name": call.function.name, "arguments": call.function.arguments}})
-        messages.append(assistant_msg)
+        messages.append(_assistant_tool_message(response, calls))
         for call in calls:
             try:
                 args = json.loads(call.function.arguments or "{}")
@@ -171,13 +193,7 @@ def plan_trip(adapter, request, places):
             calls = getattr(response, "tool_calls", None)
             if not calls:
                 break
-            assistant_msg = {"role": "assistant", "content": getattr(response, "content", None), "tool_calls": []}
-            reasoning = getattr(response, "reasoning", None)
-            if reasoning is not None:
-                assistant_msg["reasoning"] = reasoning
-            for call in calls:
-                assistant_msg["tool_calls"].append({"id": call.id, "type": "function", "function": {"name": call.function.name, "arguments": call.function.arguments}})
-            messages.append(assistant_msg)
+            messages.append(_assistant_tool_message(response, calls))
             for call in calls:
                 name = call.function.name
                 try:

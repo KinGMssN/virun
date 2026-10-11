@@ -40,16 +40,34 @@ def _raise_provider_error(exc: Exception) -> None:
         code = "PROVIDER_ERROR"
     else:
         code = "MODEL_ERROR"
-    log.warning("Groq request failed code=%s exception=%s", code, type(exc).__name__)
-    raise ModelError(code) from exc
+    detail = None
+    if isinstance(exc, BadRequestError):
+        # Groq's error.message/param describe request validation, while
+        # failed_generation can contain generated/user content and is omitted.
+        body = getattr(exc, "body", None)
+        error = body.get("error", body) if isinstance(body, dict) else {}
+        if isinstance(error, dict):
+            provider_message = error.get("message")
+            parameter = error.get("param")
+            failed_generation = error.get("failed_generation")
+            failure_reason = failed_generation.get("reason") if isinstance(failed_generation, dict) else None
+            if isinstance(provider_message, str):
+                detail = " ".join(provider_message.split())[:240]
+            if isinstance(failure_reason, str):
+                detail = ((detail + "; ") if detail else "") + "tool generation: " + " ".join(failure_reason.split())[:180]
+            if isinstance(parameter, str) and parameter:
+                detail = ((detail + " ") if detail else "") + f"parameter={parameter[:80]}"
+    log.warning("Groq request failed code=%s exception=%s detail=%s", code, type(exc).__name__, detail or "unavailable")
+    raise ModelError(code, detail) from exc
 
 
 class ModelError(Exception):
     """Safe error carrying only a code, never raw provider details."""
 
-    def __init__(self, code: str):
+    def __init__(self, code: str, detail: str | None = None):
         super().__init__(code)
         self.code = code
+        self.detail = detail
 
 
 class GroqAdapter:
