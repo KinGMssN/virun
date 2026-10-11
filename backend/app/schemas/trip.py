@@ -122,6 +122,8 @@ class GeneratedItinerary(BaseModel):
     duration_days: int = Field(ge=1, le=15)
     days: list[DayPlan]
     places: list[RealPlace] = Field(default_factory=list)
+    budget_estimate: dict | None = None
+    validation: dict | None = None
     itinerary_id: UUID | None = None
     saved_to_database: bool = False
     save_error: str | None = None

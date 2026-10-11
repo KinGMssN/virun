@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 
 from app.concierge.model_adapter import MockAdapter, ModelError, get_adapter
-from app.concierge.agent_service import run_agent
+from app.concierge.agent_service import plan_trip, run_agent
 from app.concierge.itinerary_service import generate_itinerary
 from app.concierge.places_service import find_nearby_places
 from app.concierge.service import run_parse
@@ -74,7 +74,10 @@ def generate_trip_itinerary(req: ItineraryGenerationRequest):
     try:
         adapter = get_adapter()
         real_places = find_nearby_places(req.destination)
-        itinerary = generate_itinerary(req, adapter, real_places)
+        if hasattr(adapter, "chat_with_tools"):
+            itinerary = plan_trip(adapter, req, real_places)
+        else:
+            itinerary = generate_itinerary(req, adapter, real_places)
     except ModelError as exc:
         log.warning("itinerary generation error code=%s", exc.code)
         status_code = 503 if exc.code == "NOT_CONFIGURED" else 502

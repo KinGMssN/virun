@@ -15,7 +15,7 @@ MAX_TOOL_TURNS = 6
 SYSTEM = """You are Virun, an agentic travel planner for India. Use tools to search real places, create a day plan, estimate the full trip budget, and validate the result. Ask one concise clarification question when essential destination or trip duration is missing. Never represent estimated costs as live quotes. Place search uses OpenStreetMap; if it returns no places, say so and don't claim specific venues are verified. Use available place scale scores only as simulated survey-based ranking signals, never factual quality guarantees. Respect budget/preferences; revise by calling tools again when validation reports issues. Never claim bookings, live availability, opening hours, or live prices."""
 
 TOOLS = [
-    {"type": "function", "function": {"name": "calculate_budget", "description": "Estimate total INR trip cost by category and compare against budget. Transportation may be supplied by user; absent category values use clearly identified planning assumptions.", "parameters": {"type": "object", "properties": {"duration_days": {"type": "integer", "minimum": 1, "maximum": 15}, "travelers": {"type": "integer", "minimum": 1}, "budget_inr": {"type": "number"}, "transportation_inr": {"type": "number", "minimum": 0}, "accommodation_per_night_inr": {"type": "number", "minimum": 0}, "food_per_person_per_day_inr": {"type": "number", "minimum": 0}, "activities_per_person_inr": {"type": "number", "minimum": 0}, "other_inr": {"type": "number", "minimum": 0}}, "required": ["duration_days"]}}},
+    {"type": "function", "function": {"name": "calculate_budget", "description": "Estimate total INR trip cost by category and compare against budget. Intercity fare stays excluded unless supplied; the tool states this limitation.", "parameters": {"type": "object", "properties": {"duration_days": {"type": "integer", "minimum": 1, "maximum": 15}, "travelers": {"type": "integer", "minimum": 1}, "budget_inr": {"type": "number"}, "intercity_transportation_inr": {"type": "number", "minimum": 0}, "local_transportation_per_day_inr": {"type": "number", "minimum": 0}, "accommodation_per_night_inr": {"type": "number", "minimum": 0}, "food_per_person_per_day_inr": {"type": "number", "minimum": 0}, "activities_per_person_inr": {"type": "number", "minimum": 0}, "other_inr": {"type": "number", "minimum": 0}}, "required": ["duration_days"]}}},
     {"type": "function", "function": {"name": "search_destinations", "description": "Search verified nearby attractions for a destination using OpenStreetMap. Empty results mean no verified places were found.", "parameters": {"type": "object", "properties": {"destination": {"type": "string"}, "preferences": {"type": "string"}}, "required": ["destination"]}}},
     {"type": "function", "function": {"name": "build_itinerary", "description": "Generate a day-by-day sightseeing itinerary using existing Groq itinerary logic and verified nearby places.", "parameters": {"type": "object", "properties": {"destination": {"type": "string"}, "duration_days": {"type": "integer", "minimum": 1, "maximum": 15}, "duration_nights": {"type": "integer", "minimum": 0}, "budget_inr": {"type": "number"}, "preferences": {"type": "string"}}, "required": ["destination", "duration_days"]}}},
     {"type": "function", "function": {"name": "validate_itinerary", "description": "Check day count, user preferences, schedule pace, missing trip details, and estimated cost versus budget.", "parameters": {"type": "object", "properties": {"itinerary": {"type": "object"}, "duration_days": {"type": "integer"}, "preferences": {"type": "string"}, "budget_inr": {"type": "number"}, "estimated_total_inr": {"type": "number"}}, "required": ["itinerary", "duration_days"]}}},
@@ -35,15 +35,16 @@ def _calculate_budget(args):
     travelers = max(1, int(args.get("travelers", 1)))
     nights = max(0, days - 1)
     # Heuristic planning allowances; category values supplied by user override them.
-    transport = float(args.get("transportation_inr", 0))
+    local_transport = float(args.get("local_transportation_per_day_inr", 350)) * days * travelers
+    intercity_transport = args.get("intercity_transportation_inr")
     stay_rate = float(args.get("accommodation_per_night_inr", 1500))
     food_rate = float(args.get("food_per_person_per_day_inr", 700))
     activity_rate = float(args.get("activities_per_person_inr", 500 * days))
     other = float(args.get("other_inr", 300 * days * travelers))
-    costs = {"transportation": transport, "accommodation": stay_rate * nights, "food": food_rate * days * travelers, "activities": activity_rate * travelers, "other": other}
-    total = round(sum(costs.values()), 2)
+    costs = {"local_transportation": local_transport, "intercity_transportation": None if intercity_transport is None else float(intercity_transport), "accommodation": stay_rate * nights, "food": food_rate * days * travelers, "activities": activity_rate * travelers, "other": other}
+    total = round(sum(value for value in costs.values() if value is not None), 2)
     budget = args.get("budget_inr")
-    return {"currency": "INR", "estimated_costs": costs, "estimated_total": total, "budget": budget, "within_budget": None if budget is None else total <= float(budget), "assumptions": ["Planning estimates, not live quotes", "Accommodation defaults to ₹1,500 per room-night", "Food defaults to ₹700 per traveler-day", "Activities default to ₹500 per traveler-day", "Other expenses default to ₹300 per traveler-day", "Transportation defaults to ₹0 unless supplied"]}
+    return {"currency": "INR", "estimated_costs": costs, "estimated_total": total, "budget": budget, "within_budget": None if budget is None else total <= float(budget), "complete": intercity_transport is not None, "assumptions": ["Planning estimates, not live quotes", "Intercity transportation is excluded unless you provide its cost", "Local transportation defaults to ₹350 per traveler-day", "Accommodation defaults to ₹1,500 per room-night", "Food defaults to ₹700 per traveler-day", "Activities default to ₹500 per traveler-day", "Other expenses default to ₹300 per traveler-day"]}
 
 
 def _search(args):
@@ -87,7 +88,7 @@ def _validate(args):
     activities = [str(day.get(slot, "")).strip().casefold() for day in days for slot in ("morning", "afternoon", "evening") if day.get(slot)]
     if len(activities) != len(set(activities)):
         issues.append("One or more activity descriptions repeat; vary the schedule or explain the repeat.")
-    return {"valid": not issues and not missing, "issues": issues, "missing_information": missing, "days_found": len(days), "duration_days": duration, "estimated_total_inr": cost, "budget_inr": budget}
+    return {"valid": not issues, "issues": issues, "missing_information": missing, "days_found": len(days), "duration_days": duration, "estimated_total_inr": cost, "budget_inr": budget}
 
 
 def _run_tool(name, args, adapter):
@@ -140,3 +141,91 @@ def run_agent(adapter, history, message):
     if not content:
         raise ValueError("Model returned no final response")
     return content
+
+
+def plan_trip(adapter, request, places):
+    """Drive a complete itinerary workflow, retaining tool results for the response."""
+    from app.schemas.trip import GeneratedItinerary
+
+    # Places are fetched by the endpoint and reused for ranking and itinerary generation.
+    place_result = _search_from_places(places)
+    budget = _calculate_budget({
+        "duration_days": request.duration_days,
+        "travelers": 1,
+        "budget_inr": request.budget_inr,
+    })
+    req_args = request.model_dump(exclude_none=True)
+    itinerary = None
+    validation = None
+
+    if hasattr(adapter, "chat_with_tools"):
+        messages = [
+            {"role": "system", "content": SYSTEM + " For a complete plan, use search_destinations, calculate_budget, build_itinerary, and validate_itinerary. Use the supplied destination, duration, budget, and interests exactly. If validation identifies a fixable itinerary issue, revise and validate again before finishing."},
+            {"role": "user", "content": "Create the complete itinerary now. Constraints: " + json.dumps(req_args, ensure_ascii=False) + ". Search context: " + json.dumps(place_result, ensure_ascii=False, default=str) + ". Budget calculation: " + json.dumps(budget, ensure_ascii=False) + ". Call the tools needed to create and validate the plan."},
+        ]
+        for _ in range(MAX_TOOL_TURNS):
+            response = adapter.chat_with_tools(messages, TOOLS)
+            calls = getattr(response, "tool_calls", None)
+            if not calls:
+                break
+            assistant_msg = {"role": "assistant", "content": getattr(response, "content", None), "tool_calls": []}
+            for call in calls:
+                assistant_msg["tool_calls"].append({"id": call.id, "type": "function", "function": {"name": call.function.name, "arguments": call.function.arguments}})
+            messages.append(assistant_msg)
+            for call in calls:
+                name = call.function.name
+                try:
+                    args = json.loads(call.function.arguments or "{}")
+                    if name == "search_destinations":
+                        result = place_result
+                    elif name == "calculate_budget":
+                        result = budget
+                    elif name == "build_itinerary":
+                        itinerary = generate_itinerary(request, adapter, places)
+                        result = itinerary.model_dump(mode="json")
+                    elif name == "validate_itinerary":
+                        # Recompute against the actual generated plan, not model-supplied values.
+                        if itinerary is None:
+                            itinerary = generate_itinerary(request, adapter, places)
+                        validation = _validate({"itinerary": itinerary.model_dump(mode="json"), "duration_days": request.duration_days, "preferences": request.preferences, "budget_inr": request.budget_inr, "estimated_total_inr": budget["estimated_total"]})
+                        result = validation
+                    else:
+                        result = {"error": "Unknown tool"}
+                except Exception as exc:
+                    log.warning("planning tool failed name=%s error=%s", name, type(exc).__name__)
+                    result = {"error": "Tool failed; the planner will retry with available information."}
+                messages.append({"role": "tool", "tool_call_id": call.id, "content": json.dumps(result, ensure_ascii=False, default=str)})
+
+    # Guarantee a complete response even when the model stops early or skips a tool.
+    if itinerary is None:
+        itinerary = generate_itinerary(request, adapter, places)
+    validation = _validate({"itinerary": itinerary.model_dump(mode="json"), "duration_days": request.duration_days, "preferences": request.preferences, "budget_inr": request.budget_inr, "estimated_total_inr": budget["estimated_total"]})
+    # Give the existing generator one corrective pass for schedule or preference issues.
+    fixable = [issue for issue in validation["issues"] if "exceeds budget" not in issue]
+    if fixable:
+        from app.schemas.trip import ItineraryGenerationRequest
+        revised_request = ItineraryGenerationRequest(
+            **{**request.model_dump(), "preferences": ((request.preferences or "")[:850] + "\nPlanner revision required: " + "; ".join(fixable))[:1000]}
+        )
+        try:
+            revised = generate_itinerary(revised_request, adapter, places)
+            revised_validation = _validate({"itinerary": revised.model_dump(mode="json"), "duration_days": request.duration_days, "preferences": request.preferences, "budget_inr": request.budget_inr, "estimated_total_inr": budget["estimated_total"]})
+            itinerary, validation = revised, revised_validation
+        except Exception as exc:
+            log.warning("itinerary revision failed (%s)", type(exc).__name__)
+    itinerary.budget_estimate = budget
+    itinerary.validation = validation
+    return itinerary
+
+
+def _search_from_places(places):
+    scores, source = _place_scores()
+    results = []
+    for place in places:
+        item = dict(place)
+        score = scores.get(str(item.get("name", "")).casefold())
+        item["survey_scale_score"] = score["scale"] if score else None
+        item["survey_scale_source"] = source if score else None
+        results.append(item)
+    results.sort(key=lambda p: (p["survey_scale_score"] is None, -(p["survey_scale_score"] or 0), p["name"].casefold()))
+    return {"source": "OpenStreetMap", "count": len(results), "places": results, "ranking_note": "Known places are ranked by the workbook's simulated survey scale; this is not a factual quality guarantee."}
