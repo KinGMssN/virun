@@ -23,7 +23,7 @@ def test_validation_reports_budget_and_duration_issues():
 
 def test_native_tool_turns_return_tool_result_and_continue():
     call = SimpleNamespace(id="call-1", function=SimpleNamespace(name="calculate_budget", arguments='{"duration_days": 1, "budget_inr": 4000}'))
-    first = SimpleNamespace(content=None, tool_calls=[call])
+    first = SimpleNamespace(content=None, tool_calls=[call], reasoning="provider reasoning token")
     final = SimpleNamespace(content="A one-day estimate is ready.", tool_calls=None)
 
     class Adapter:
@@ -40,3 +40,4 @@ def test_native_tool_turns_return_tool_result_and_continue():
     assert tools
     assert messages[-1]["role"] == "tool"
     assert '"within_budget": true' in messages[-1]["content"]
+    assert messages[-2]["reasoning"] == "provider reasoning token"

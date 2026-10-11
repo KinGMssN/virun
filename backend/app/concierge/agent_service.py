@@ -121,6 +121,9 @@ def run_agent(adapter, history, message):
                 return content
             raise ValueError("Model returned no final response")
         assistant_msg = {"role": "assistant", "content": getattr(response, "content", None), "tool_calls": []}
+        reasoning = getattr(response, "reasoning", None)
+        if reasoning is not None:
+            assistant_msg["reasoning"] = reasoning
         for call in calls:
             assistant_msg["tool_calls"].append({"id": call.id, "type": "function", "function": {"name": call.function.name, "arguments": call.function.arguments}})
         messages.append(assistant_msg)
@@ -169,6 +172,9 @@ def plan_trip(adapter, request, places):
             if not calls:
                 break
             assistant_msg = {"role": "assistant", "content": getattr(response, "content", None), "tool_calls": []}
+            reasoning = getattr(response, "reasoning", None)
+            if reasoning is not None:
+                assistant_msg["reasoning"] = reasoning
             for call in calls:
                 assistant_msg["tool_calls"].append({"id": call.id, "type": "function", "function": {"name": call.function.name, "arguments": call.function.arguments}})
             messages.append(assistant_msg)
