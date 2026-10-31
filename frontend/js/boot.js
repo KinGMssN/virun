@@ -76,20 +76,56 @@
     });
   });
 
-  /* sign in: demo only, role decides the landing page */
+  /* sign in: demo accounts are checked locally; other demo logins still open a dashboard */
   var sform = document.getElementById('signinForm');
   if (sform) sform.addEventListener('submit', function (e) {
     e.preventDefault();
-    V.store.set('username', document.getElementById('signinName').value.trim() || 'Traveler');
-    V.store.set('email', document.getElementById('signinEmail').value.trim());
+    var typedName = document.getElementById('signinName').value.trim();
+    var typedEmail = document.getElementById('signinEmail').value.trim().toLowerCase();
+    var typedPass = document.getElementById('signinPassword') ? document.getElementById('signinPassword').value : '';
+    var err = document.getElementById('signinError');
+    var match = null;
+    if (D.demoAccounts) D.demoAccounts.forEach(function (a) {
+      if (typedEmail === a.email.toLowerCase() || typedEmail === a.username.toLowerCase() || typedName.toLowerCase() === a.username.toLowerCase()) match = a;
+    });
+    if (match && typedPass !== match.password) {
+      if (err) { err.textContent = 'Wrong demo password for ' + match.name + '. Use the demo account button below to fill it in.'; err.classList.remove('hidden'); }
+      return;
+    }
+    if (match) {
+      V.store.set('username', match.name);
+      V.store.set('email', match.email);
+      V.store.set('role', match.role);
+      V.store.set('demo_account', match.id);
+      if (match.city && D.cityData[match.city]) V.setCity(match.city);
+      if (match.role === 'guide' && !V.store.getJSON('guide_cities', null)) V.store.setJSON('guide_cities', [match.city]);
+    } else {
+      V.store.set('username', typedName || 'Traveler');
+      V.store.set('email', typedEmail);
+      var srole2 = document.getElementById('signinRole');
+      V.store.set('role', srole2 ? srole2.value : 'tourist');
+      try { localStorage.removeItem('virun_demo_account'); } catch (_) {}
+    }
     var srole = document.getElementById('signinRole');
-    V.store.set('role', srole ? srole.value : 'tourist');
-    location.href = (srole && srole.value === 'guide') ? 'guide-dashboard.html' : 'tourist-dashboard.html';
+    var role = match ? match.role : (srole ? srole.value : 'tourist');
+    location.href = role === 'guide' ? 'guide-dashboard.html' : 'tourist-dashboard.html';
+  });
+  /* demo account picker: fills the sign-in form, password field is masked */
+  document.querySelectorAll('[data-demo]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var a = null;
+      if (D.demoAccounts) D.demoAccounts.forEach(function (x) { if (x.id === btn.getAttribute('data-demo')) a = x; });
+      if (!a) return;
+      var n = document.getElementById('signinName'), em = document.getElementById('signinEmail'),
+        pw = document.getElementById('signinPassword'), ro = document.getElementById('signinRole');
+      if (n) n.value = a.name; if (em) em.value = a.email; if (pw) pw.value = a.password; if (ro) ro.value = a.role;
+      var err = document.getElementById('signinError'); if (err) err.classList.add('hidden');
+    });
   });
   /* reset demo: clear ALL demo login, signup, requests, choices, and consent in this browser */
   document.querySelectorAll('[data-reset-demo]').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      if (!window.confirm('Clear all demo data in this browser? This removes demo login, signup, guide requests, known cities, availability, journey, and cookie choice.')) return;
+      if (!window.confirm('Clear all demo data in this browser? This removes demo login, signup, guide requests, chat messages, known cities, availability, journey, and cookie choice.')) return;
       try {
         var keys = [];
         for (var i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
@@ -103,7 +139,7 @@
   document.querySelectorAll('[data-signout]').forEach(function (a) {
     a.addEventListener('click', function (e) {
       e.preventDefault();
-      try { localStorage.removeItem('virun_username'); localStorage.removeItem('virun_role'); localStorage.removeItem('virun_email'); } catch (_) {}
+      try { localStorage.removeItem('virun_username'); localStorage.removeItem('virun_role'); localStorage.removeItem('virun_email'); localStorage.removeItem('virun_demo_account'); } catch (_) {}
       location.href = 'index.html';
     });
   });
@@ -178,11 +214,27 @@
   var guideList = document.getElementById('guideList');
   if (guideList && D.guideSample) {
     var city = V.getCity();
-    guideList.innerHTML = D.guideSample.examples.map(function (ex, i) {
+    var demoRows = (D.demoAccounts || []).filter(function (a) { return a.role === 'guide'; }).map(function (a, i) {
+      var already = getRequests().some(function (r) { return r.guide === a.name && r.status === 'Requested'; });
+      return '<div class="list-row"><div><h3>' + a.name + ' · ' + a.city + '</h3><p>' + a.tours + ' · ' + a.languages + '</p><p class="small">' + a.priceOffline + ' · ' + a.priceOnline + ' · Demo guide account.</p></div>' +
+        '<button class="btn small" type="button" data-demo-guide="' + i + '"' + (already ? ' disabled' : '') + '>' + (already ? 'Requested' : 'Request guide') + '</button></div>';
+    }).join('');
+    guideList.innerHTML = demoRows + D.guideSample.examples.map(function (ex, i) {
       var already = getRequests().some(function (r) { return r.tour === ex.title && r.status === 'Requested'; });
       return '<div class="list-row"><div><h3>' + ex.title + '</h3><p>' + city + ' · ' + ex.meta + ' · ' + ex.detail + '</p><p class="small">Sample guide offer, languages English, Telugu, Hindi.</p></div>' +
         '<button class="btn small" type="button" data-request="' + i + '"' + (already ? ' disabled' : '') + '>' + (already ? 'Requested' : 'Request guide') + '</button></div>';
     }).join('');
+    guideList.querySelectorAll('[data-demo-guide]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var guides = (D.demoAccounts || []).filter(function (a) { return a.role === 'guide'; });
+        var a = guides[Number(btn.getAttribute('data-demo-guide'))];
+        var reqs = getRequests();
+        reqs.push({ id: 'req-' + Date.now(), city: a.city, tour: a.tours, meta: a.priceOffline, guide: a.name, traveler: V.store.get('username', 'Traveler'), status: 'Requested', created: new Date().toLocaleDateString() });
+        saveRequests(reqs);
+        btn.disabled = true; btn.textContent = 'Requested';
+        renderMyRequests();
+      });
+    });
     guideList.querySelectorAll('[data-request]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var ex = D.guideSample.examples[Number(btn.getAttribute('data-request'))];
@@ -232,6 +284,38 @@
     }
     renderRequests();
   }
+
+  /* trip chat: local demo chat, saved in this browser only */
+  var chatLog = document.getElementById('chatLog');
+  var chatForm = document.getElementById('chatForm');
+  if (chatLog && chatForm) {
+    var chatMsgs = V.store.getJSON('chat_messages', null);
+    if (!chatMsgs) {
+      chatMsgs = [
+        { from: 'Guide', text: 'I am at the meeting point near the first stop.' },
+        { from: 'You', text: 'I have checked in and can see the route status.' },
+        { from: 'Guide', text: 'Great. We can begin when you are ready.' }
+      ];
+    }
+    function renderChat() {
+      var me = V.store.get('username', 'You');
+      chatLog.innerHTML = chatMsgs.map(function (m) {
+        var mine = m.from === me || m.from === 'You';
+        return '<div class="bubble' + (mine ? ' me' : '') + '">' + m.text + '</div>';
+      }).join('');
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+    renderChat();
+    chatForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var input = document.getElementById('chatInput');
+      var text = input.value.trim(); if (!text) return;
+      chatMsgs.push({ from: V.store.get('username', 'You'), text: text });
+      V.store.setJSON('chat_messages', chatMsgs);
+      input.value = ''; renderChat();
+    });
+  }
+
   /* guide dashboard: request summary */
   var summary = document.getElementById('guideRequestSummary');
   if (summary) {

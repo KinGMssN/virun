@@ -65,9 +65,22 @@
     ]
   };
 
+
+  /* Demo accounts, browser only. Passwords are demo only, checked locally,
+     never sent to a server. Real accounts need live Supabase, still pending. */
+  var demoAccounts = [
+    { id: 'guide-vizag', role: 'guide', name: 'Priya Reddy', username: 'priya.vizag', email: 'priya.vizag@virun.demo', password: 'Vizag@123', city: 'Visakhapatnam', languages: 'Telugu, English, Hindi', tours: 'Coastal sunrise tour, RK Beach heritage walk', priceOnline: 'Rs 400 for 45 minutes online', priceOffline: 'Rs 1,200 for a full day offline' },
+    { id: 'guide-kashmir', role: 'guide', name: 'Imran Sheikh', username: 'imran.kashmir', email: 'imran.kashmir@virun.demo', password: 'Kashmir@123', city: 'Kashmir', languages: 'Hindi, English, Kashmiri', tours: 'Gulmarg adventure day, Dal Lake heritage walk', priceOnline: 'Rs 600 for 45 minutes online', priceOffline: 'Rs 2,000 for a full day offline' },
+    { id: 'guide-bengaluru', role: 'guide', name: 'Arjun Rao', username: 'arjun.bengaluru', email: 'arjun.bengaluru@virun.demo', password: 'Bengaluru@123', city: 'Bengaluru', languages: 'Kannada, English, Hindi', tours: 'City orientation walk, Lalbagh and old Bengaluru walk', priceOnline: 'Rs 500 for 45 minutes online', priceOffline: 'Rs 1,500 for a full day offline' },
+    { id: 'tourist-rohan', role: 'tourist', name: 'Rohan Mehta', username: 'rohan.tourist', email: 'rohan.mehta@virun.demo', password: 'Tourist@123', city: 'Kashmir', homeCity: 'Mumbai', wants: 'Kashmir adventure trip' },
+    { id: 'tourist-sneha', role: 'tourist', name: 'Sneha Patel', username: 'sneha.tourist', email: 'sneha.patel@virun.demo', password: 'Tourist@123', city: 'Visakhapatnam', homeCity: 'Hyderabad', wants: 'Visakhapatnam heritage trip' },
+    { id: 'tourist-vikram', role: 'tourist', name: 'Vikram Singh', username: 'vikram.tourist', email: 'vikram.singh@virun.demo', password: 'Tourist@123', city: 'Bengaluru', homeCity: 'Delhi', wants: 'Bengaluru city trip' },
+    { id: 'tourist-divya', role: 'tourist', name: 'Divya Kumar', username: 'divya.tourist', email: 'divya.kumar@virun.demo', password: 'Tourist@123', city: 'Goa', homeCity: 'Chennai', wants: 'Goa beach trip' }
+  ];
+
   window.VirunData = {
     imageRoot: imageRoot, cityCoords: cityCoords, cityPhotoCounts: cityPhotoCounts,
     goaPhotoNames: goaPhotoNames, mockTransportOptions: mockTransportOptions,
-    journeyCities: journeyCities, cityData: cityData, guideSample: guideSample, img: img
+    journeyCities: journeyCities, cityData: cityData, guideSample: guideSample, demoAccounts: demoAccounts, img: img
   };
 })();

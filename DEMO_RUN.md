@@ -44,3 +44,21 @@ transport dataset, place data, or any code, because the planner needs
 those to run. No real account is created in the demo, so there is no
 backend account to delete. After reset, the home page opens clean, and
 you can sign in again with fake demo details.
+
+## Demo accounts (browser only, 2026-10-31)
+Sign in page has a tap-to-fill demo picker. Demo passwords are checked
+locally in the browser, never sent to a server. No real account is created.
+Reset demo data clears these logins, requests, and chat messages.
+Guides: Priya Reddy, Visakhapatnam, priya.vizag@virun.demo, Vizag@123;
+Imran Sheikh, Kashmir, imran.kashmir@virun.demo, Kashmir@123;
+Arjun Rao, Bengaluru, arjun.bengaluru@virun.demo, Bengaluru@123.
+Tourists, all password Tourist@123: Rohan Mehta, rohan.mehta@virun.demo;
+Sneha Patel, sneha.patel@virun.demo; Vikram Singh, vikram.singh@virun.demo;
+Divya Kumar, divya.kumar@virun.demo.
+Cross-role test, same browser only: sign in as a tourist, request a demo
+guide, sign out, sign in as that guide, open Guide requests, Accept/Reject.
+Trip chat is also local: messages sent as a tourist appear for the guide
+in the same browser, and the other way round.
+Still NOT real: Supabase live accounts, KYC/verification, booking,
+payment/escrow, live bus fares, production Render. Those need a provider
+and Yatra decisions, and must not be shown as live.
