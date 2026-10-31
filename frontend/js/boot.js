@@ -316,6 +316,134 @@
     });
   }
 
+
+  /* payment: frontend only, Pay with, Pay, paying, paid. No money, no Stripe, no Razorpay */
+  var payForm = document.getElementById('paymentForm');
+  if (payForm) {
+    var storedPay = V.store.getJSON('payment_demo', null);
+    var payNote = document.getElementById('paymentNote');
+    if (storedPay && payNote) payNote.style.display = 'block';
+    payForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var method = 'UPI';
+      var checked = payForm.querySelector('input[name="payMethod"]:checked');
+      if (checked) method = checked.value;
+      var btn = document.getElementById('payBtn');
+      btn.disabled = true; btn.textContent = 'Paying... demo only, no money moved';
+      setTimeout(function () {
+        V.store.setJSON('payment_demo', { method: method, amount: 1200, status: 'paid-demo', date: new Date().toLocaleDateString() });
+        V.store.set('trip_status', 'paid');
+        btn.textContent = 'Paid, demo';
+        var succ = document.getElementById('paymentSuccess');
+        var pm = document.getElementById('paidMethod');
+        if (pm) pm.textContent = method;
+        if (succ) succ.classList.remove('hidden');
+        succ.scrollIntoView();
+      }, 1500);
+    });
+  }
+  /* active trip: mark complete, then review unlocks */
+  var completeBtn = document.getElementById('completeTripBtn');
+  if (completeBtn) {
+    function refreshComplete() {
+      var done = V.store.get('trip_status', '') === 'completed';
+      var note = document.getElementById('completeTripNote');
+      var link = document.getElementById('reviewLink');
+      if (done) {
+        completeBtn.textContent = 'Trip completed, demo';
+        completeBtn.disabled = true;
+        if (note) note.textContent = 'Trip marked complete in this demo browser. Review and rating are now open.';
+        if (link) link.style.display = 'inline-flex';
+      }
+    }
+    refreshComplete();
+    completeBtn.addEventListener('click', function () {
+      var reqs = V.store.getJSON('guide_requests', []);
+      var guide = reqs.length && reqs[reqs.length - 1].guide ? reqs[reqs.length - 1].guide : '';
+      var pay = V.store.getJSON('payment_demo', null);
+      V.store.setJSON('completed_trip', { city: V.getCity(), date: new Date().toLocaleDateString(), guide: guide, amount: 1200, method: pay ? pay.method : 'Not paid in demo' });
+      V.store.set('trip_status', 'completed');
+      refreshComplete();
+    });
+  }
+  /* trip history: show completed trip, if any */
+  var historyList = document.getElementById('historyList');
+  if (historyList) {
+    var ct = V.store.getJSON('completed_trip', null);
+    var empty = document.getElementById('historyEmpty');
+    if (ct) {
+      if (empty) empty.style.display = 'none';
+      historyList.innerHTML = '<article class="card"><h2 style="margin-top:0">' + ct.city + ' trip, completed, demo</h2><p>Date: ' + ct.date + ' · Guide: ' + (ct.guide || 'Not picked in demo') + ' · Payment shown: ' + ct.method + ' · Rs 1,200 demo amount, no money moved.</p><div class="action-row"><a class="btn" href="review.html">Leave a review and rating</a><a class="btn secondary" href="reviews.html">See reviews</a></div></article>';
+    }
+  }
+  /* review: rating, gated on a completed trip, saved in this browser */
+  var reviewForm = document.getElementById('reviewForm');
+  if (reviewForm) {
+    var completed = V.store.get('trip_status', '') === 'completed';
+    var locked = document.getElementById('reviewLocked');
+    if (!completed) {
+      if (locked) locked.style.display = 'block';
+      reviewForm.querySelectorAll('input, textarea, select, button').forEach(function (el) { el.disabled = true; });
+    } else {
+      var rating = 0;
+      var ratingNote = document.getElementById('ratingNote');
+      reviewForm.querySelectorAll('[data-star]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          rating = Number(b.getAttribute('data-star'));
+          if (ratingNote) ratingNote.textContent = rating + ' star' + (rating > 1 ? 's' : '') + ' picked.';
+        });
+      });
+      var ct2 = V.store.getJSON('completed_trip', null);
+      var guideInput = document.getElementById('reviewGuide');
+      if (ct2 && ct2.guide && guideInput) guideInput.value = ct2.guide;
+      reviewForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (!rating) { if (ratingNote) ratingNote.textContent = 'Pick a star rating first.'; return; }
+        var revs = V.store.getJSON('reviews_demo', []);
+        revs.push({ guide: guideInput ? guideInput.value : '', rating: rating, good: document.getElementById('reviewGood').value, improve: document.getElementById('reviewBad').value, again: document.getElementById('reviewAgain').value, by: V.store.get('username', 'Traveler'), date: new Date().toLocaleDateString() });
+        V.store.setJSON('reviews_demo', revs);
+        location.href = 'trip-history.html';
+      });
+    }
+  }
+  /* reviews page: show saved demo reviews, not skeleton fakes */
+  var reviewsList = document.getElementById('reviewsList');
+  if (reviewsList) {
+    var revs2 = V.store.getJSON('reviews_demo', []);
+    reviewsList.innerHTML = revs2.length ? revs2.map(function (r) {
+      return '<article class="card"><h3 style="margin-top:0">' + r.rating + ' stars · ' + (r.guide || 'Guide, demo') + '</h3><p>' + r.good + '</p><p class="small">By ' + r.by + ' · ' + r.date + ' · Demo review, saved in this browser.</p></article>';
+    }).join('') : '<p>No demo reviews yet in this browser. Complete a trip, then leave a review and rating.</p>';
+  }
+  /* KYC: frontend only, full ID number is never stored, only type + last 4 */
+  var kycForm = document.getElementById('kycForm');
+  if (kycForm) {
+    function showKyc() {
+      var s = V.store.getJSON('kyc_demo', null);
+      var el = document.getElementById('kycStatus');
+      if (!el) return;
+      if (!s) { el.innerHTML = '<strong>Status: Pending review</strong><br>Frontend demo only.'; return; }
+      if (s.status === 'verified-demo') el.innerHTML = '<strong>Status: Verified, demo preview</strong><br>Frontend view only. This does not mean a real check passed. Document: ' + s.doc + (s.last4 ? ' · Last 4: ' + s.last4 : '') + '.';
+      else el.innerHTML = '<strong>Status: Submitted, demo, pending review</strong><br>Frontend view only. Document: ' + s.doc + (s.last4 ? ' · Last 4: ' + s.last4 : '') + '. Cities: ' + (s.cities.length ? s.cities.join(', ') : 'None picked') + '.';
+    }
+    showKyc();
+    kycForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var raw = document.getElementById('kycId').value.trim();
+      var cities = [];
+      kycForm.querySelectorAll('.kyc-city:checked').forEach(function (c) { cities.push(c.value); });
+      V.store.setJSON('kyc_demo', { doc: document.getElementById('kycDoc').value, last4: raw ? raw.slice(-4) : '', cities: cities, status: 'submitted' });
+      document.getElementById('kycId').value = '';
+      showKyc();
+    });
+    var previewBtn = document.getElementById('kycPreviewBtn');
+    if (previewBtn) previewBtn.addEventListener('click', function () {
+      var s = V.store.getJSON('kyc_demo', null) || { doc: document.getElementById('kycDoc').value, last4: '', cities: [] };
+      s.status = 'verified-demo';
+      V.store.setJSON('kyc_demo', s);
+      showKyc();
+    });
+  }
+
   /* guide dashboard: request summary */
   var summary = document.getElementById('guideRequestSummary');
   if (summary) {

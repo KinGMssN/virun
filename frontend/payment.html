@@ -13,7 +13,22 @@
 <canvas id="weather" aria-hidden="true"></canvas>
 <div id="nav"></div>
 <main id="main">
-<section class="app-page"><div class="app-shell"><div class="page-head"><div><p class="eyebrow"><span data-fill="city"></span> trip</p><h1>Payment preview</h1><p>This is a visual mock. No card data is sent or stored.</p></div></div><form class="card" data-goto="active-trip.html"><div class="form-grid"><div class="field"><label>Name on card</label><input required></div><div class="field"><label>Card number</label><input required inputmode="numeric" placeholder="0000 0000 0000 0000"></div><div class="field"><label>Expiry</label><input required placeholder="MM/YY"></div><div class="field"><label>Security code</label><input required inputmode="numeric"></div></div><div class="notice">Demo only: payment processing is not connected.</div><button class="btn coral" type="submit" style="margin-top:18px">Continue to active trip</button></form></div></section>
+<section class="app-page"><div class="app-shell"><div class="page-head"><div><p class="eyebrow"><span data-fill="city"></span> trip</p><h1>Payment</h1><p>Demo only. Scroll down, pick how you would pay, tap Pay. No money is charged, no Stripe, no Razorpay, nothing is sent anywhere.</p></div></div>
+<p class="notice" id="paymentNote" style="display:none">Demo payment already recorded in this browser. You can pay again below to preview it.</p>
+<article class="card"><h2 style="margin-top:0">Order summary</h2><div class="list"><div class="list-row"><span>Trip</span><strong><span data-fill="city"></span>, 3 days</strong></div><div class="list-row"><span>Guide fee, demo</span><strong>Rs 1,200</strong></div><div class="list-row"><span>Platform fee, demo</span><strong>Rs 0</strong></div><div class="list-row"><span>Total to show</span><strong>Rs 1,200</strong></div></div><p class="small">This is a demo amount for showing the flow. It is not a charge.</p></article>
+<form class="card" id="paymentForm"><h2 style="margin-top:0">Pay with</h2>
+<div class="list">
+<label class="list-row"><span><strong>UPI</strong><br><span class="small">Google Pay, PhonePe, Paytm, demo</span></span><input type="radio" name="payMethod" value="UPI" checked></label>
+<label class="list-row"><span><strong>Card</strong><br><span class="small">Debit or credit card, demo</span></span><input type="radio" name="payMethod" value="Card"></label>
+<label class="list-row"><span><strong>NetBanking</strong><br><span class="small">Bank transfer, demo</span></span><input type="radio" name="payMethod" value="NetBanking"></label>
+<label class="list-row"><span><strong>Wallet</strong><br><span class="small">In-app wallet, demo</span></span><input type="radio" name="payMethod" value="Wallet"></label>
+</div>
+<div class="form-grid" style="margin-top:16px"><div class="field"><label for="payUpi">UPI ID, demo only, optional</label><input id="payUpi" placeholder="name@upi, demo only"></div><div class="field"><label for="payCardName">Name on card, demo only, optional</label><input id="payCardName" placeholder="Demo name"></div><div class="field"><label for="payCardNum">Card number, demo only, do not enter a real card</label><input id="payCardNum" inputmode="numeric" placeholder="0000 0000 0000 0000"></div><div class="field"><label for="payCardExp">Expiry, demo only</label><input id="payCardExp" placeholder="MM/YY"></div></div>
+<div class="notice" style="margin-top:16px">Demo only: no card or UPI details are sent or stored. Use demo values only.</div>
+<button class="btn coral" type="submit" id="payBtn" style="margin-top:18px">Pay Rs 1,200</button>
+</form>
+<div class="card hidden" id="paymentSuccess"><h2 style="margin-top:0">Paid, demo</h2><p><strong>Payment complete in this demo.</strong> No money moved. Method: <span id="paidMethod"></span>. Amount shown: Rs 1,200.</p><p class="small">Next: go to your active trip. When the trip is finished, mark it complete, then review and rating will open.</p><div class="action-row"><a class="btn" href="active-trip.html">Go to active trip</a><a class="btn secondary" href="trip-history.html">Trip history</a></div></div>
+</div></section>
 </main>
 <div id="mobileNav"></div>
 

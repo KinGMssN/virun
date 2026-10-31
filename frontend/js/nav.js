@@ -39,7 +39,7 @@
   function guideNav(active) {
     var V = window.Virun;
     var links = [
-      ['guide-dashboard.html', 'Dashboard'], ['guide-requests.html', 'Requests'],
+      ['guide-dashboard.html', 'Dashboard'], ['guide-requests.html', 'Requests'], ['guide-verification.html', 'Verification'],
       ['guide-earnings.html', 'Earnings'], ['guide-profile.html', 'Profile']
     ];
     return '<header class="app-top"><div class="app-top-inner">' +

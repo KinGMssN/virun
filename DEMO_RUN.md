@@ -62,3 +62,17 @@ in the same browser, and the other way round.
 Still NOT real: Supabase live accounts, KYC/verification, booking,
 payment/escrow, live bus fares, production Render. Those need a provider
 and Yatra decisions, and must not be shown as live.
+
+## Frontend-only payment, review, KYC (2026-11-01, no real integration)
+Payment: booking -> payment.html, scroll page. Pick Pay with UPI, Card,
+NetBanking, or Wallet, tap Pay Rs 1,200, it shows Paying for 1.5 seconds,
+then Paid, demo. No money, no Stripe, no Razorpay, no card or UPI data
+sent or stored. After payment, go to Active trip.
+Review and rating: only after Mark trip as complete on Active trip.
+Then review.html unlocks, star rating 1 to 5, saved in this browser,
+shown on Reviews and Trip history. Before completion, review shows locked.
+KYC: guide-verification.html, frontend view only. Pick document type,
+optional demo ID, city knowledge, Submit for review, or Show verified
+preview. Only document type and last 4 characters are kept, full ID is
+never stored. Do not enter a real ID number. Verified preview does not
+mean a real check passed.
