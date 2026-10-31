@@ -1,6 +1,17 @@
 import copy
+import os
 
 import pytest
+
+# Planner tests use the bundled JSON dataset. Production still defaults to
+# 'empty' when TRANSPORT_REPOSITORY is unset, so a missing database is
+# never silently replaced by demo data outside tests.
+os.environ.setdefault('TRANSPORT_REPOSITORY', 'json')
+try:
+    from app.repositories.transport_repository import get_default_repository
+    get_default_repository.cache_clear()
+except Exception:
+    pass
 
 from app.repositories.transport_repository import JsonTransportRepository
 from app.schemas.transport import Stop, TransportOption

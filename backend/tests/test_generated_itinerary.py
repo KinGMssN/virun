@@ -114,7 +114,7 @@ def test_includes_only_places_returned_by_the_places_provider(monkeypatch):
     assert day["afternoon_location"] == PLACE
     assert day["evening_location"] == PLACE
     assert all("Charminar" in day[slot] for slot in ("morning", "afternoon", "evening"))
-    assert "do not invent or substitute venue\nnames" in generator.prompt
+    assert "do not invent or substitute venue names" in generator.prompt
 
 
 def test_itinerary_still_generates_when_place_lookup_returns_no_results(monkeypatch):

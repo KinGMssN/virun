@@ -4,12 +4,12 @@ from app.concierge.agent_service import _calculate_budget, _validate, run_agent
 
 
 def test_budget_breakdown_and_limit_comparison():
-    result = _calculate_budget({"duration_days": 3, "travelers": 2, "budget_inr": 10000, "transportation_inr": 1000})
+    result = _calculate_budget({"duration_days": 3, "travelers": 2, "budget_inr": 10000, "intercity_transportation_inr": 1000})
     assert result["estimated_costs"] == {
-        "transportation": 1000, "accommodation": 3000, "food": 4200,
-        "activities": 3000, "other": 1800,
+        "local_transportation": 2100, "intercity_transportation": 1000,
+        "accommodation": 3000, "food": 4200, "activities": 3000, "other": 1800,
     }
-    assert result["estimated_total"] == 13000
+    assert result["estimated_total"] == 15100
     assert result["within_budget"] is False
     assert "not live quotes" in result["assumptions"][0]
 

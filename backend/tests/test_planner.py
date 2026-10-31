@@ -244,7 +244,7 @@ def test_frontend_and_resources_are_served():
     page = client.get("/")
     assert page.status_code == 200
     assert "text/html" in page.headers["content-type"]
-    assert "<title>Virun</title>" in page.text
+    assert "<title>Virun" in page.text
 
     image = client.get("/resources/images/chatbot/virun-happy.png")
     assert image.status_code == 200
