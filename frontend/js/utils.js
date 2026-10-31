@@ -169,7 +169,7 @@
   }
 
   function footerHTML() {
-    return '<footer class="public-footer"><div class="footer-inner"><div><strong>Plan with context. Travel with local knowledge.</strong><div class="footer-note">Photos: Wikimedia Commons. Map data: OpenStreetMap contributors.</div></div><div class="footer-links"><a href="pricing.html">Pricing</a><a href="explore.html">Explore</a><a href="reviews.html">Reviews</a><a href="about-team.html">About Team</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms and Conditions</a><button class="footer-cookie" type="button" id="cookieSettings">Cookie settings</button></div></div></footer>';
+    return '<footer class="public-footer"><div class="footer-inner"><div><strong>Plan with context. Travel with local knowledge.</strong><div class="footer-note">Photos: Wikimedia Commons. Map data: OpenStreetMap contributors.</div></div><div class="footer-links"><a href="pricing.html">Pricing</a><a href="explore.html">Explore</a><a href="reviews.html">Reviews</a><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms and Conditions</a><button class="footer-cookie" type="button" id="cookieSettings">Cookie settings</button><button class="footer-cookie" type="button" data-reset-demo>Reset demo data</button></div></div></footer>';
   }
 
   window.Virun = {

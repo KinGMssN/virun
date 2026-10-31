@@ -1,4 +1,9 @@
-.public-nav,.app-top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--midnight) 94%,transparent);color:#fff;border-bottom:1px solid rgba(255,255,255,.12)}
+.public-nav{position:sticky;top:0;z-index:20;background:#FFFFFF;color:var(--ink);border-bottom:1px solid var(--line)}
+.public-nav .nav-link{color:var(--ink)}
+.public-nav .nav-link:hover,.public-nav .nav-link.active{background:var(--surface2);color:var(--primary)}
+.app-top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--midnight) 94%,transparent);color:#fff;border-bottom:1px solid rgba(255,255,255,.12)}
+.app-top .nav-link{color:#FFFFFF}
+.app-top .nav-link:hover,.app-top .nav-link.active{background:rgba(255,255,255,.16);color:#FFFFFF}
 
 
 .hero{min-height:650px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);align-items:center;gap:64px;width:min(1180px,calc(100% - 40px));margin:auto;padding:78px 0}

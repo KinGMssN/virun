@@ -22,13 +22,6 @@
     'Anjuna Beach', 'Fontainhas', 'Reis Magos Fort', 'Colva Beach', 'Arambol',
     'Mangueshi Temple', 'Miramar Beach', 'Cabo de Rama'];
 
-  var team = [
-    { name: 'Mohit Sai Satyanarayana', college: 'MVGR College', year: 'Second year' },
-    { name: 'Dhanunjay Reddy', college: 'Andhra University', year: 'Second year' },
-    { name: 'Leela Prasad', college: 'Vignan Engineering College', year: 'Second year' },
-    { name: 'Gudiya Deppu', college: 'MVGR College of Engineering', year: '' }
-  ];
-
   /* Mock transport options — the marked swap-in point for the team's booking API. */
   var mockTransportOptions = [
     { id: 'train-t101', kind: 'Train', name: 'Demo Rail T-101', depart: '06:20', arrive: '19:15', duration: '12h 55m', fare: 510, seats: 42, className: 'Second sitting' },
@@ -74,7 +67,7 @@
 
   window.VirunData = {
     imageRoot: imageRoot, cityCoords: cityCoords, cityPhotoCounts: cityPhotoCounts,
-    goaPhotoNames: goaPhotoNames, team: team, mockTransportOptions: mockTransportOptions,
+    goaPhotoNames: goaPhotoNames, mockTransportOptions: mockTransportOptions,
     journeyCities: journeyCities, cityData: cityData, guideSample: guideSample, img: img
   };
 })();

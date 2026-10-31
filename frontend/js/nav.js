@@ -4,7 +4,7 @@
   function publicNav(active) {
     var links = [
       ['index.html', 'Home'], ['pricing.html', 'Pricing'], ['explore.html', 'Explore'],
-      ['reviews.html', 'Reviews'], ['about-team.html', 'Team']
+      ['reviews.html', 'Reviews']
     ];
     return '<header class="public-nav"><nav class="nav-inner" aria-label="Primary"><div class="nav-links">' +
       links.map(function (l) {

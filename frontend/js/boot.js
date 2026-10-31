@@ -86,6 +86,19 @@
     V.store.set('role', srole ? srole.value : 'tourist');
     location.href = (srole && srole.value === 'guide') ? 'guide-dashboard.html' : 'tourist-dashboard.html';
   });
+  /* reset demo: clear ALL demo login, signup, requests, choices, and consent in this browser */
+  document.querySelectorAll('[data-reset-demo]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (!window.confirm('Clear all demo data in this browser? This removes demo login, signup, guide requests, known cities, availability, journey, and cookie choice.')) return;
+      try {
+        var keys = [];
+        for (var i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
+        keys.forEach(function (k) { if (k && k.indexOf('virun_') === 0) localStorage.removeItem(k); });
+        sessionStorage.clear();
+      } catch (_) {}
+      location.href = 'index.html';
+    });
+  });
   /* sign out: clear demo account only, keep city and journey */
   document.querySelectorAll('[data-signout]').forEach(function (a) {
     a.addEventListener('click', function (e) {

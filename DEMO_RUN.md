@@ -33,3 +33,14 @@ Groq, Supabase, or RailRadar keys. Database migration only runs when
 Booking, payment and escrow, KYC and guide verification, live bus fares
 and inventory, Supabase live verification, production Render project, and
 4 backend tests that were already failing before this change.
+
+## Reset demo data completely
+
+Tap "Reset demo data" on the home page hero, or in the footer on any
+public page. It asks for confirmation, then clears in this browser only:
+demo login, signup name, email and role, guide requests, known cities,
+availability, journey, and cookie choice. It does not delete the
+transport dataset, place data, or any code, because the planner needs
+those to run. No real account is created in the demo, so there is no
+backend account to delete. After reset, the home page opens clean, and
+you can sign in again with fake demo details.
