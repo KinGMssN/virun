@@ -33,7 +33,7 @@
       links.map(function (l) {
         return '<a class="nav-link' + (active === l[0] ? ' active' : '') + '" href="' + l[0] + '">' + l[1] + '</a>';
       }).join('') + '</nav>' +
-      '<a class="btn small" href="active-trip.html">Active trip</a></div></header>';
+      '<a class="btn small" href="active-trip.html">Active trip</a><a class="nav-link" href="index.html" data-signout>Sign out</a></div></header>';
   }
 
   function guideNav(active) {
@@ -49,7 +49,7 @@
       links.map(function (l) {
         return '<a class="nav-link' + (active === l[0] ? ' active' : '') + '" href="' + l[0] + '">' + l[1] + '</a>';
       }).join('') + '</nav>' +
-      '<a class="btn small" href="guide-requests.html">Booking queue</a></div></header>';
+      '<a class="btn small" href="guide-requests.html">Booking queue</a><a class="nav-link" href="index.html" data-signout>Sign out</a></div></header>';
   }
 
   function mobileNav(active) {

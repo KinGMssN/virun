@@ -21,4 +21,8 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: TRANSPORT_REPOSITORY
-        value: supabase
+        value: json
+      - key: USE_MOCK_PARSER
+        value: "true"
+      - key: ENABLE_MOCK_FALLBACK
+        value: "true"

@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = FastAPI(
-    title="TBS RoamAgent - Deterministic Route Planner",
-    description="Member 3. All fares, timestamps and feasibility are computed here, never by an LLM. "
+    title="Virun",
+    description="Virun trip planner. All fares, timestamps and feasibility are computed here, never by an LLM. "
     "Bundled data is SIMULATED.",
     version="1.0.0",
 )
@@ -125,3 +125,19 @@ app.include_router(planner_router)
 app.include_router(railradar_router)
 app.include_router(profile_router)
 app.include_router(guides_router)
+
+# Serve the other frontend pages from the backend too, so the demo opens
+# from one URL (Render) as well as from GitHub Pages. API routes above win:
+# this only matches a plain *.html file name in the frontend folder.
+for _static_dir, _mount in ((_FRONTEND_ROOT / "css", "/css"), (_FRONTEND_ROOT / "js", "/js")):
+    if _static_dir.is_dir():
+        app.mount(_mount, StaticFiles(directory=str(_static_dir)), name=_mount.strip("/"))
+
+
+@app.get("/{page}.html", include_in_schema=False)
+def frontend_page(page: str):
+    safe = Path(page).name
+    candidate = _FRONTEND_ROOT / f"{safe}.html"
+    if candidate.is_file():
+        return FileResponse(candidate, media_type="text/html")
+    return JSONResponse(status_code=404, content={"detail": "Page not found."})
